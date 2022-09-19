@@ -2,8 +2,8 @@ import express from "express";
 import helmet from "helmet";
 import dotenv from "dotenv";
 
-import { v1 } from "#routes/index";
-import { errorMiddleware } from "./middlewares";
+import v1 from "#routes/index";
+import middleware from "#middlewares/index";
 
 dotenv.config();
 
@@ -23,8 +23,8 @@ app.use("/user", v1.UserRouter);
 
 /*------------- Error middleware -------------*/
 
-app.use(errorMiddleware.notFound);
-app.use(errorMiddleware.errorHandler);
+app.use(middleware.errorMiddleware.notFound);
+app.use(middleware.errorMiddleware.errorHandler);
 
 app.listen(PORT, () => {
   console.log(`User Server listening on port ${PORT}`);

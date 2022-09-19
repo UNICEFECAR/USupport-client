@@ -1,1 +1,3 @@
-export * as errorMiddleware from "./errorMiddleware";
+import * as errorMiddleware from "./errorMiddleware.js";
+
+export default { errorMiddleware };

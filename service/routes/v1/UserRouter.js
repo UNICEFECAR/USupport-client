@@ -1,6 +1,6 @@
 import express from "express";
 
-import { getUserSchema } from "../../schemas/UserControllerSchemas";
+import { getUserSchema } from "../../schemas/UserControllerSchemas.js";
 
 const router = express.Router();
 
