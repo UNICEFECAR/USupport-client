@@ -9,7 +9,7 @@ router.get("/", async (req, res) => {
    * #route   GET /user/v1/user
    * #desc    Get current user
    */
-  const user_id = "123"; // Add Auth logic to get User ID
+  const user_id = "9a8f2808-b4ab-475d-84a1-6556dde403a5"; // Add Auth logic to get User ID
 
   return await getUserSchema
     .noUnknown(true)
