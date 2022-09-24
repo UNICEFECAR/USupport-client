@@ -1,2 +1,2 @@
-# USupport-user
-USupportMe user Node.js API service
+# USupport-client
+USupport client Node.js API service
