@@ -1,8 +1,8 @@
 {
   "type": "module",
-  "name": "user",
+  "name": "client",
   "version": "1.0.0",
-  "description": "Express.js app for the USupportMe user API service",
+  "description": "Express.js app for the USupport client API service",
   "main": "server.js",
   "scripts": {
     "test": "echo \"No tests set up\" && exit 1",
