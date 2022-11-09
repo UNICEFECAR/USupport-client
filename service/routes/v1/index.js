@@ -1,1 +1,1 @@
-export { router as UserRouter } from "./UserRouter.js";
+export { router as ClientRouter } from "./ClientRouter.js";
