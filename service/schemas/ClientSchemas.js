@@ -41,3 +41,17 @@ export const deleteClientDataSchema = yup.object().shape({
   country: yup.string().required(),
   language: yup.string().required(),
 });
+
+export const updateClientImageSchema = yup.object().shape({
+  client_id: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+  image: yup.string().required(),
+});
+
+export const updateClientDataProcessingSchema = yup.object().shape({
+  client_id: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+  dataProcessing: yup.boolean().required(),
+});

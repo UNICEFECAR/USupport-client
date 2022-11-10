@@ -105,3 +105,33 @@ export const deleteClientDataQuery = async ({
     throw e;
   }
 };
+
+export const updateClientImageQuery = async ({
+  poolCountry,
+  client_id,
+  image,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+      UPDATE client_detail
+      SET image = $1
+      WHERE client_detail_id = $2
+      RETURNING *;
+    `,
+    [image, client_id]
+  );
+
+export const updateClientDataProcessingQuery = async ({
+  poolCountry,
+  client_id,
+  dataProcessing,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+        UPDATE client_detail
+        SET data_processing = $1
+        WHERE client_detail_id = $2
+        RETURNING *;
+      `,
+    [dataProcessing, client_id]
+  );
