@@ -92,12 +92,12 @@ router.put("/image", securedRoute, async (req, res, next) => {
   const language = req.header("x-language-alpha-2");
 
   const client_id = req.client.client_detail_id;
-  const payload = req.body;
+  const image = req.user.user_id;
 
   return await updateClientImageSchema
     .noUnknown(true)
     .strict()
-    .validate({ country, language, client_id, ...payload })
+    .validate({ country, language, client_id, image })
     .then(updateClientImage)
     .then((result) => res.status(200).send(result))
     .catch(next);
