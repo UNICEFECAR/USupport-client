@@ -15,3 +15,11 @@ export const notAuthenticated = (language) => {
   error.status = 401;
   return error;
 };
+
+export const incorrectPassword = (language) => {
+  const error = new Error();
+  error.message = t("incorrect_password_error", language);
+  error.name = "INCORRECT PASSWORD";
+  error.status = 404;
+  return error;
+};

@@ -40,6 +40,9 @@ export const deleteClientDataSchema = yup.object().shape({
   user_id: yup.string().uuid().required(),
   country: yup.string().required(),
   language: yup.string().required(),
+  image: yup.string().required(),
+  userPassword: yup.string().required(),
+  password: yup.string().required(),
 });
 
 export const updateClientImageSchema = yup.object().shape({

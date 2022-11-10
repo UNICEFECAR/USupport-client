@@ -59,12 +59,25 @@ router.delete("/", securedRoute, async (req, res, next) => {
   const language = req.header("x-language-alpha-2");
 
   const client_id = req.client.client_detail_id;
+  const image = req.client.image;
+
   const user_id = req.user.user_id;
+  const password = req.user.password;
+
+  const payload = req.body;
 
   return await deleteClientDataSchema
     .noUnknown(true)
     .strict()
-    .validate({ country, language, client_id, user_id })
+    .validate({
+      country,
+      language,
+      client_id,
+      user_id,
+      image,
+      userPassword: password,
+      ...payload,
+    })
     .then(deleteClientData)
     .then((result) => res.status(200).send(result))
     .catch(next);

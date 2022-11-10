@@ -1,3 +1,7 @@
+/* eslint-disable no-useless-catch */
+import AWS from "aws-sdk";
+import bcrypt from "bcryptjs";
+
 import {
   updateClientDataQuery,
   deleteClientDataQuery,
@@ -6,7 +10,12 @@ import {
   updateClientDataProcessingQuery,
 } from "#queries/clients";
 
-import { userNotFound } from "#utils/errors";
+import { userNotFound, incorrectPassword } from "#utils/errors";
+
+const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
+const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
+const AWS_REGION = process.env.AWS_REGION;
+const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 
 export const updateClientData = async ({
   country,
@@ -48,16 +57,57 @@ export const deleteClientData = async ({
   language,
   client_id,
   user_id,
+  image,
+  password,
+  userPassword,
 }) => {
+  const validatePassword = await bcrypt.compare(password, userPassword);
+
+  if (!validatePassword) {
+    throw incorrectPassword(language);
+  }
+
   return await deleteClientDataQuery({
     poolCountry: country,
     client_id,
     user_id,
   })
-    .then((res) => {
+    .then(async (res) => {
       if (res.rowCount === 0) {
         throw userNotFound(language);
       } else {
+        if (image !== "default") {
+          try {
+            const s3 = new AWS.S3({
+              accessKeyId: AWS_ACCESS_KEY_ID,
+              secretAccessKey: AWS_SECRET_ACCESS_KEY,
+              region: AWS_REGION,
+            });
+
+            const params = {
+              Bucket: AWS_BUCKET_NAME,
+              Prefix: image,
+            };
+
+            const objectVersions = await s3
+              .listObjectVersions(params)
+              .promise();
+
+            const versions = objectVersions.Versions.map((version) => {
+              const deleteParams = {
+                Bucket: AWS_BUCKET_NAME,
+                Key: version.Key,
+                VersionId: version.VersionId,
+              };
+              return s3.deleteObject(deleteParams).promise();
+            });
+
+            await Promise.all(versions);
+          } catch (err) {
+            throw err;
+          }
+        }
+
         return res.rows[0];
       }
     })
