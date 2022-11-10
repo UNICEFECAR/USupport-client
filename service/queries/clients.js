@@ -33,7 +33,6 @@ export const updateClientDataQuery = async ({
   surname,
   nickname,
   email,
-  image,
   sex,
   yearOfBirth,
   livingPlace,
@@ -45,24 +44,13 @@ export const updateClientDataQuery = async ({
           surname = $2, 
           nickname = $3, 
           email = $4, 
-          image = $5,
-          sex = $6,
-          year_of_birth = $7,
-          living_place = $8
-      WHERE client_detail_id = $9
+          sex = $5,
+          year_of_birth = $6,
+          living_place = $7
+      WHERE client_detail_id = $8
       RETURNING *;
     `,
-    [
-      name,
-      surname,
-      nickname,
-      email,
-      image,
-      sex,
-      yearOfBirth,
-      livingPlace,
-      client_id,
-    ]
+    [name, surname, nickname, email, sex, yearOfBirth, livingPlace, client_id]
   );
 
 export const deleteClientDataQuery = async ({

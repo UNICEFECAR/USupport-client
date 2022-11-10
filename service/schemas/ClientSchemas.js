@@ -28,7 +28,6 @@ export const updateClientDataSchema = (language) =>
         is: undefined,
         then: yup.string().required(t("access_token_required_error", language)),
       }),
-      image: yup.string().notRequired(),
       sex: sexTypeSchema.notRequired(),
       yearOfBirth: yup.number().positive().notRequired(),
       livingPlace: livingTypeSchema.notRequired(),
