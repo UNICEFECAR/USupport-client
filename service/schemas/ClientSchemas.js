@@ -35,3 +35,10 @@ export const updateClientDataSchema = (language) =>
     },
     ["userAccessToken", "email"]
   );
+
+export const deleteClientDataSchema = yup.object().shape({
+  client_id: yup.string().uuid().required(),
+  user_id: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+});

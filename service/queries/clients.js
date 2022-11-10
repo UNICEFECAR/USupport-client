@@ -64,3 +64,56 @@ export const updateClientDataQuery = async ({
       client_id,
     ]
   );
+
+export const deleteClientDataQuery = async ({
+  poolCountry,
+  client_id,
+  user_id,
+}) => {
+  const piiPool = getDBPool("piiDb", poolCountry);
+
+  try {
+    // Begin transaction
+    await piiPool.query("BEGIN");
+
+    // Delete client data
+    const res = await piiPool.query(
+      `
+          UPDATE client_detail
+          SET name = 'DELETED',
+              surname = 'DELETED',
+              nickname = 'DELETED',
+              email = 'DELETED',
+              image = 'default',
+              sex = NULL,
+              push_token = NULL,
+              year_of_birth = NULL,
+              living_place = NULL,
+              data_processing = false,
+              access_token = NULL
+          WHERE client_detail_id = $1
+          RETURNING *;
+      `,
+      [client_id]
+    );
+
+    // Invalide the user
+    await piiPool.query(
+      `
+          UPDATE "user"
+          SET is_deleted = true
+          WHERE user_id = $1
+      `,
+      [user_id]
+    );
+
+    // Commit transaction
+    await piiPool.query("COMMIT");
+
+    return res;
+  } catch (e) {
+    // Rollback transaction in case of error
+    await piiPool.query("ROLLBACK");
+    throw e;
+  }
+};
