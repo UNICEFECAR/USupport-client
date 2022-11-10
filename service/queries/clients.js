@@ -13,7 +13,7 @@ export const getClientByUserID = async (poolCountry, user_id) =>
 
     ), clientData AS (
 
-        SELECT client_detail."client_detail_id", "name", surname, nickname, email, image, sex, year_of_birth as yearOfBirth, living_place, data_processing, access_token
+        SELECT client_detail."client_detail_id", "name", surname, nickname, email, image, sex, year_of_birth, living_place, data_processing, access_token
         FROM client_detail
           JOIN userData ON userData.client_detail_id = client_detail.client_detail_id
         ORDER BY client_detail.created_at DESC
