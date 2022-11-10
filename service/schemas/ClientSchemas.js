@@ -1,3 +1,37 @@
 import * as yup from "yup";
 
-// Add the schemas here.
+import { t } from "#translations/index";
+
+const sexTypeSchema = yup
+  .string()
+  .oneOf(["male", "female", "unspecified", "notMentioned"]);
+
+const livingTypeSchema = yup.string().oneOf(["urban", "rural"]);
+
+export const updateClientDataSchema = (language) =>
+  yup.object().shape(
+    {
+      client_id: yup.string().uuid().required(),
+      country: yup.string().required(),
+      language: yup.string().required(),
+      name: yup.string().notRequired(),
+      surname: yup.string().notRequired(),
+      nickname: yup.string().required(t("nickname_required_error", language)),
+      email: yup.string().when("userAccessToken", {
+        is: undefined,
+        then: yup
+          .string()
+          .email()
+          .required(t("email_required_error", language)),
+      }),
+      userAccessToken: yup.string().when("email", {
+        is: undefined,
+        then: yup.string().required(t("access_token_required_error", language)),
+      }),
+      image: yup.string().notRequired(),
+      sex: sexTypeSchema.notRequired(),
+      yearOfBirth: yup.number().positive().notRequired(),
+      livingPlace: livingTypeSchema.notRequired(),
+    },
+    ["userAccessToken", "email"]
+  );
