@@ -2,6 +2,7 @@ import {
   updateClientDataQuery,
   deleteClientDataQuery,
   updateClientImageQuery,
+  deleteClientImageQuery,
   updateClientDataProcessingQuery,
 } from "#queries/clients";
 
@@ -75,6 +76,23 @@ export const updateClientImage = async ({
     poolCountry: country,
     client_id,
     image,
+  })
+    .then((res) => {
+      if (res.rowCount === 0) {
+        throw userNotFound(language);
+      } else {
+        return res.rows[0];
+      }
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const deleteClientImage = async ({ country, language, client_id }) => {
+  return await deleteClientImageQuery({
+    poolCountry: country,
+    client_id,
   })
     .then((res) => {
       if (res.rowCount === 0) {

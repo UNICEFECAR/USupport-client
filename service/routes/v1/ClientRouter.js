@@ -7,6 +7,7 @@ import {
   deleteClientDataSchema,
   updateClientImageSchema,
   updateClientDataProcessingSchema,
+  deleteClientImageSchema,
 } from "#schemas/clientSchemas";
 
 import {
@@ -14,6 +15,7 @@ import {
   deleteClientData,
   updateClientImage,
   updateClientDataProcessing,
+  deleteClientImage,
 } from "#controllers/clients";
 
 const router = express.Router();
@@ -84,6 +86,25 @@ router.put("/image", securedRoute, async (req, res, next) => {
     .strict()
     .validate({ country, language, client_id, ...payload })
     .then(updateClientImage)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.delete("/image", securedRoute, async (req, res, next) => {
+  /**
+   * #route   DELETE /client/v1/client/image
+   * #desc    Delete the client image
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+
+  const client_id = req.client.client_detail_id;
+
+  return await deleteClientImageSchema
+    .noUnknown(true)
+    .strict()
+    .validate({ country, language, client_id })
+    .then(deleteClientImage)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
