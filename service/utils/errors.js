@@ -23,3 +23,11 @@ export const incorrectPassword = (language) => {
   error.status = 404;
   return error;
 };
+
+export const emailUsed = (language) => {
+  const error = new Error();
+  error.message = t("email_already_used_error", language);
+  error.name = "EMAIL ALREADY USED";
+  error.status = 409;
+  return error;
+};

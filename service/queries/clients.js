@@ -26,6 +26,16 @@ export const getClientByUserID = async (poolCountry, user_id) =>
     [user_id]
   );
 
+export const checkIfEmailIsUsedQuery = async ({ country, email }) =>
+  await getDBPool("piiDb", country).query(
+    `
+    SELECT email
+    FROM client_detail
+    WHERE email = $1
+    `,
+    [email]
+  );
+
 export const updateClientDataQuery = async ({
   poolCountry,
   client_id,

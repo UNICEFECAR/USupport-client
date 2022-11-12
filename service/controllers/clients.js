@@ -4,13 +4,14 @@ import bcrypt from "bcryptjs";
 
 import {
   updateClientDataQuery,
+  checkIfEmailIsUsedQuery,
   deleteClientDataQuery,
   updateClientImageQuery,
   deleteClientImageQuery,
   updateClientDataProcessingQuery,
 } from "#queries/clients";
 
-import { userNotFound, incorrectPassword } from "#utils/errors";
+import { userNotFound, incorrectPassword, emailUsed } from "#utils/errors";
 
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
@@ -25,10 +26,28 @@ export const updateClientData = async ({
   surname,
   nickname,
   email,
+  currentEmail,
   sex,
   yearOfBirth,
   livingPlace,
 }) => {
+  // Check if email is changed
+  if (email !== currentEmail) {
+    // Check if email is already taken
+    await checkIfEmailIsUsedQuery({
+      country,
+      email,
+    })
+      .then((res) => {
+        if (res.rowCount > 0) {
+          throw emailUsed(language);
+        }
+      })
+      .catch((err) => {
+        throw err;
+      });
+  }
+
   return await updateClientDataQuery({
     poolCountry: country,
     client_id,

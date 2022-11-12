@@ -24,6 +24,13 @@ export const updateClientDataSchema = (language) =>
           .email()
           .required(t("email_required_error", language)),
       }),
+      currentEmail: yup.string().when("userAccessToken", {
+        is: undefined,
+        then: yup
+          .string()
+          .email()
+          .required(t("email_required_error", language)),
+      }),
       userAccessToken: yup.string().when("email", {
         is: undefined,
         then: yup.string().required(t("access_token_required_error", language)),

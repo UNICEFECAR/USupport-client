@@ -39,12 +39,14 @@ router.put("/", securedRoute, async (req, res, next) => {
   const language = req.header("x-language-alpha-2");
 
   const client_id = req.client.client_detail_id;
+  const currentEmail = req.client.email;
+
   const payload = req.body;
 
   return await updateClientDataSchema(language)
     .noUnknown(true)
     .strict()
-    .validate({ country, language, client_id, ...payload })
+    .validate({ country, language, client_id, currentEmail, ...payload })
     .then(updateClientData)
     .then((result) => res.status(200).send(result))
     .catch(next);
@@ -62,7 +64,7 @@ router.delete("/", securedRoute, async (req, res, next) => {
   const image = req.client.image;
 
   const user_id = req.user.user_id;
-  const password = req.user.password;
+  const userPassword = req.user.password;
 
   const payload = req.body;
 
@@ -75,7 +77,7 @@ router.delete("/", securedRoute, async (req, res, next) => {
       client_id,
       user_id,
       image,
-      userPassword: password,
+      userPassword,
       ...payload,
     })
     .then(deleteClientData)
