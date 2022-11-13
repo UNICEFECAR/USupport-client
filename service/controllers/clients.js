@@ -11,7 +11,7 @@ import {
   updateClientDataProcessingQuery,
 } from "#queries/clients";
 
-import { userNotFound, incorrectPassword, emailUsed } from "#utils/errors";
+import { clientNotFound, incorrectPassword, emailUsed } from "#utils/errors";
 
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
@@ -61,7 +61,7 @@ export const updateClientData = async ({
   })
     .then((res) => {
       if (res.rowCount === 0) {
-        throw userNotFound(language);
+        throw clientNotFound(language);
       } else {
         return res.rows[0];
       }
@@ -93,7 +93,7 @@ export const deleteClientData = async ({
   })
     .then(async (res) => {
       if (res.rowCount === 0) {
-        throw userNotFound(language);
+        throw clientNotFound(language);
       } else {
         if (image !== "default") {
           try {
@@ -148,7 +148,7 @@ export const updateClientImage = async ({
   })
     .then((res) => {
       if (res.rowCount === 0) {
-        throw userNotFound(language);
+        throw clientNotFound(language);
       } else {
         return res.rows[0];
       }
@@ -165,7 +165,7 @@ export const deleteClientImage = async ({ country, language, client_id }) => {
   })
     .then((res) => {
       if (res.rowCount === 0) {
-        throw userNotFound(language);
+        throw clientNotFound(language);
       } else {
         return res.rows[0];
       }
@@ -188,7 +188,7 @@ export const updateClientDataProcessing = async ({
   })
     .then((res) => {
       if (res.rowCount === 0) {
-        throw userNotFound(language);
+        throw clientNotFound(language);
       } else {
         return res.rows[0];
       }

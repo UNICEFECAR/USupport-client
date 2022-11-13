@@ -1,6 +1,6 @@
 import express from "express";
 
-import { securedRoute } from "#middlewares/auth";
+import { populateClient, populateUser } from "#middlewares/populateMiddleware";
 
 import {
   updateClientDataSchema,
@@ -20,7 +20,7 @@ import {
 
 const router = express.Router();
 
-router.get("/", securedRoute, async (req, res) => {
+router.get("/", populateClient, async (req, res) => {
   /**
    * #route   GET /client/v1/client
    * #desc    Get current client data
@@ -30,7 +30,7 @@ router.get("/", securedRoute, async (req, res) => {
   res.status(200).send(clientData);
 });
 
-router.put("/", securedRoute, async (req, res, next) => {
+router.put("/", populateClient, async (req, res, next) => {
   /**
    * #route   PUT /client/v1/client
    * #desc    Update current client data
@@ -52,7 +52,7 @@ router.put("/", securedRoute, async (req, res, next) => {
     .catch(next);
 });
 
-router.delete("/", securedRoute, async (req, res, next) => {
+router.delete("/", populateClient, populateUser, async (req, res, next) => {
   /**
    * #route   DELETE /client/v1/client
    * #desc    Delete current client data
@@ -85,7 +85,7 @@ router.delete("/", securedRoute, async (req, res, next) => {
     .catch(next);
 });
 
-router.put("/image", securedRoute, async (req, res, next) => {
+router.put("/image", populateClient, populateUser, async (req, res, next) => {
   /**
    * #route   PUT /client/v1/client/image
    * #desc    Update the client image
@@ -94,6 +94,7 @@ router.put("/image", securedRoute, async (req, res, next) => {
   const language = req.header("x-language-alpha-2");
 
   const client_id = req.client.client_detail_id;
+
   const image = req.user.user_id;
 
   return await updateClientImageSchema
@@ -105,7 +106,7 @@ router.put("/image", securedRoute, async (req, res, next) => {
     .catch(next);
 });
 
-router.delete("/image", securedRoute, async (req, res, next) => {
+router.delete("/image", populateClient, async (req, res, next) => {
   /**
    * #route   DELETE /client/v1/client/image
    * #desc    Delete the client image
@@ -126,7 +127,7 @@ router.delete("/image", securedRoute, async (req, res, next) => {
 
 router.put(
   "/data-processing-agreement",
-  securedRoute,
+  populateClient,
   async (req, res, next) => {
     /**
      * #route   PUT /client/v1/client/data-processing-agreement
