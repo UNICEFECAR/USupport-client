@@ -19,6 +19,7 @@ app.use(helmet());
 /*------------- Client Service Endpoints -------------*/
 
 app.use("/client/v1/client", v1.ClientRouter);
+app.use("/client/v1/consultation", v1.ConsultationRouter);
 
 /*------------- Error middleware -------------*/
 
