@@ -6,7 +6,7 @@ export const getAllConsultationsQuery = async ({ poolCountry, client_id }) =>
     
       SELECT *
       FROM consultation
-      WHERE client_detail_id = $1
+      WHERE client_detail_id = $1 AND (status = 'suggested' OR status = 'scheduled' OR status = 'finished')
       ORDER BY created_at DESC
 
     `,
