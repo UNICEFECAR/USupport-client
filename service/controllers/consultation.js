@@ -65,6 +65,7 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
       }${providerSurname}`,
       provider_image: providersDetails[consultation.provider_detail_id].image,
       time: consultation.time,
+      status: consultation.status,
     });
   }
 
