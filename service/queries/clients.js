@@ -13,7 +13,7 @@ export const getClientByUserID = async (poolCountry, user_id) =>
 
     ), clientData AS (
 
-        SELECT client_detail."client_detail_id", "name", surname, nickname, email, image, sex, year_of_birth, living_place, data_processing, access_token
+        SELECT client_detail."client_detail_id", "name", surname, nickname, email, image, sex, year_of_birth, urban_rural, data_processing, access_token
         FROM client_detail
           JOIN userData ON userData.client_detail_id = client_detail.client_detail_id
         ORDER BY client_detail.created_at DESC
@@ -56,7 +56,7 @@ export const updateClientDataQuery = async ({
           email = $4, 
           sex = $5,
           year_of_birth = $6,
-          living_place = $7
+          urban_rural = $7
       WHERE client_detail_id = $8
       RETURNING *;
     `,
@@ -86,7 +86,7 @@ export const deleteClientDataQuery = async ({
               sex = NULL,
               push_token = NULL,
               year_of_birth = NULL,
-              living_place = NULL,
+              urban_rural = NULL,
               data_processing = false,
               access_token = NULL
           WHERE client_detail_id = $1
