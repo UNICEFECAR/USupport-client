@@ -37,7 +37,7 @@ export const updateClientDataSchema = (language) =>
       }),
       sex: sexTypeSchema.notRequired(),
       yearOfBirth: yup.number().positive().notRequired(),
-      livingPlace: livingTypeSchema.notRequired(),
+      urbanRural: livingTypeSchema.notRequired(),
     },
     ["userAccessToken", "email"]
   );

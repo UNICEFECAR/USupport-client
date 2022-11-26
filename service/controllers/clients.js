@@ -29,7 +29,7 @@ export const updateClientData = async ({
   currentEmail,
   sex,
   yearOfBirth,
-  livingPlace,
+  urbanRural,
 }) => {
   // Check if email is changed
   if (email !== currentEmail) {
@@ -57,7 +57,7 @@ export const updateClientData = async ({
     email,
     sex,
     yearOfBirth,
-    livingPlace,
+    urbanRural,
   })
     .then((res) => {
       if (res.rowCount === 0) {

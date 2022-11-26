@@ -45,7 +45,7 @@ export const updateClientDataQuery = async ({
   email,
   sex,
   yearOfBirth,
-  livingPlace,
+  urbanRural,
 }) =>
   await getDBPool("piiDb", poolCountry).query(
     `
@@ -60,7 +60,7 @@ export const updateClientDataQuery = async ({
       WHERE client_detail_id = $8
       RETURNING *;
     `,
-    [name, surname, nickname, email, sex, yearOfBirth, livingPlace, client_id]
+    [name, surname, nickname, email, sex, yearOfBirth, urbanRural, client_id]
   );
 
 export const deleteClientDataQuery = async ({
