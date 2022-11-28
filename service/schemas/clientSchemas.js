@@ -6,7 +6,7 @@ const sexTypeSchema = yup
   .string()
   .oneOf(["male", "female", "unspecified", "notMentioned"]);
 
-const livingTypeSchema = yup.string().oneOf(["urban", "rural"]);
+const urbanRuralTypeSchema = yup.string().oneOf(["urban", "rural"]);
 
 export const updateClientDataSchema = (language) =>
   yup.object().shape(
@@ -37,7 +37,7 @@ export const updateClientDataSchema = (language) =>
       }),
       sex: sexTypeSchema.notRequired(),
       yearOfBirth: yup.number().positive().notRequired(),
-      urbanRural: livingTypeSchema.notRequired(),
+      urbanRural: urbanRuralTypeSchema.notRequired(),
     },
     ["userAccessToken", "email"]
   );
