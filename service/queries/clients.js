@@ -95,7 +95,7 @@ export const deleteClientDataQuery = async ({
       [client_id]
     );
 
-    // Invalide the user
+    // Invalidate the user
     await piiPool.query(
       `
           UPDATE "user"
