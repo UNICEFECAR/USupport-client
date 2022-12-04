@@ -61,7 +61,7 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
       consultation_id: consultation.consultation_id,
       provider_detail_id: consultation.provider_detail_id,
       provider_name: `${providerName} ${
-        providerPatronym ? providerName : ""
+        providerPatronym ? providerPatronym + " " : ""
       }${providerSurname}`,
       provider_image: providersDetails[consultation.provider_detail_id].image,
       time: consultation.time,
