@@ -23,7 +23,7 @@ export const populateClient = async (req, res, next) => {
       return next(clientNotFound(country));
     }
 
-    await setCacheItem(cacheKey, client, 3600);
+    await setCacheItem(cacheKey, client, 60 * 60 * 2); // cache data for 2 hours
     req.client = client;
   }
 
@@ -45,7 +45,7 @@ export const populateUser = async (req, res, next) => {
         throw err;
       });
 
-    await setCacheItem(cacheKey, user, 3600);
+    await setCacheItem(cacheKey, user, 60 * 60 * 2); // cache data for 2 hours
     req.user = user;
   }
 
