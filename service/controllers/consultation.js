@@ -59,6 +59,7 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
 
     response.push({
       consultation_id: consultation.consultation_id,
+      chat_id: consultation.chat_id,
       provider_detail_id: consultation.provider_detail_id,
       provider_name: `${providerName} ${
         providerPatronym ? providerPatronym + " " : ""
