@@ -3,6 +3,7 @@ import express from "express";
 import { populateClient, populateUser } from "#middlewares/populateMiddleware";
 
 import {
+  getClientByIdSchema,
   updateClientDataSchema,
   deleteClientDataSchema,
   updateClientImageSchema,
@@ -11,6 +12,7 @@ import {
 } from "#schemas/clientSchemas";
 
 import {
+  getClientById,
   updateClientData,
   deleteClientData,
   updateClientImage,
@@ -28,6 +30,30 @@ router.get("/", populateClient, async (req, res) => {
   const clientData = req.client;
 
   res.status(200).send(clientData);
+});
+
+router.get("/by-id", async (req, res, next) => {
+  /**
+   * #route   GET /client/v1/client/by-id
+   * #desc    Get client data by id
+   */
+
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+
+  const clientId = req.query.clientId;
+
+  return await getClientByIdSchema
+    .noUnknown(true)
+    .strict()
+    .validate({
+      country,
+      language,
+      clientId,
+    })
+    .then(getClientById)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
 });
 
 router.put("/", populateClient, async (req, res, next) => {

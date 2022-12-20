@@ -3,6 +3,7 @@ import AWS from "aws-sdk";
 import bcrypt from "bcryptjs";
 
 import {
+  getClientByIdQuery,
   updateClientDataQuery,
   checkIfEmailIsUsedQuery,
   deleteClientDataQuery,
@@ -17,6 +18,23 @@ const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 const AWS_REGION = process.env.AWS_REGION;
 const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+
+export const getClientById = async ({ country, language, clientId }) => {
+  return await getClientByIdQuery({
+    poolCountry: country,
+    clientId,
+  })
+    .then((res) => {
+      if (res.rowCount === 0) {
+        throw clientNotFound(language);
+      } else {
+        return res.rows[0];
+      }
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
 
 export const updateClientData = async ({
   country,

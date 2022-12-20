@@ -1,5 +1,18 @@
 import { getDBPool } from "#utils/dbConfig";
 
+export const getClientByIdQuery = async ({ poolCountry, clientId }) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+
+      SELECT client_detail_id, name, surname, nickname, email, image
+      FROM client_detail
+      WHERE client_detail_id = $1
+      LIMIT 1;
+      
+    `,
+    [clientId]
+  );
+
 export const getClientByUserID = async (poolCountry, user_id) =>
   await getDBPool("piiDb", poolCountry).query(
     `
