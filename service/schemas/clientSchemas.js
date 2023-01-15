@@ -75,3 +75,9 @@ export const updateClientDataProcessingSchema = yup.object().shape({
   language: yup.string().required(),
   dataProcessing: yup.boolean().required(),
 });
+
+export const getClientByIdSchema = yup.object().shape({
+  clientId: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+});
