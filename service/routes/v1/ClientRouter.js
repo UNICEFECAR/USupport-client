@@ -121,7 +121,7 @@ router.put("/image", populateClient, populateUser, async (req, res, next) => {
 
   const client_id = req.client.client_detail_id;
 
-  const image = req.user.user_id;
+  const image = req.body.image;
 
   return await updateClientImageSchema
     .noUnknown(true)
