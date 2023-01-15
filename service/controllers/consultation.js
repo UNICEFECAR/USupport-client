@@ -1,4 +1,9 @@
-import { getAllConsultationsQuery } from "#queries/consultation";
+import {
+  getAllConsultationsQuery,
+  getSecurityCheckAnswersByConsultationIdQuery,
+  addSecurityCheckAnswersQuery,
+  updateSecurityCheckAnswersQuery,
+} from "#queries/consultation";
 
 import { getProviderByIdQuery } from "#queries/providers";
 
@@ -67,8 +72,91 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
       provider_image: providersDetails[consultation.provider_detail_id].image,
       time: consultation.time,
       status: consultation.status,
+      price: consultation.price,
     });
   }
 
   return response;
+};
+
+export const getSecurityCheckAnswersByConsultationId = async ({
+  country,
+  consultation_id,
+}) => {
+  const answers = await getSecurityCheckAnswersByConsultationIdQuery({
+    poolCountry: country,
+    consultation_id,
+  })
+    .then((res) => {
+      if (res.rowCount === 0) {
+        return {};
+      } else {
+        return res.rows[0];
+      }
+    })
+    .catch((err) => {
+      throw err;
+    });
+
+  return answers;
+};
+
+export const addSecurityCheckAnswers = async ({
+  country,
+  consultationId,
+  contactsDisclosure,
+  suggestOutsideMeeting,
+  identityCoercion,
+  unsafeFeeling,
+  moreDetails,
+}) => {
+  return await addSecurityCheckAnswersQuery({
+    poolCountry: country,
+    consultationId,
+    contactsDisclosure,
+    suggestOutsideMeeting,
+    identityCoercion,
+    unsafeFeeling,
+    moreDetails,
+  })
+    .then((res) => {
+      if (res.rowCount === 0) {
+        return {};
+      } else {
+        return res.rows[0];
+      }
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const updateSecurityCheckAnswers = async ({
+  country,
+  consultationId,
+  contactsDisclosure,
+  suggestOutsideMeeting,
+  identityCoercion,
+  unsafeFeeling,
+  moreDetails,
+}) => {
+  return await updateSecurityCheckAnswersQuery({
+    poolCountry: country,
+    consultationId,
+    contactsDisclosure,
+    suggestOutsideMeeting,
+    identityCoercion,
+    unsafeFeeling,
+    moreDetails,
+  })
+    .then((res) => {
+      if (res.rowCount === 0) {
+        return {};
+      } else {
+        return res.rows[0];
+      }
+    })
+    .catch((err) => {
+      throw err;
+    });
 };
