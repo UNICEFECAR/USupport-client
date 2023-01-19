@@ -63,6 +63,7 @@ router.put("/", populateClient, async (req, res, next) => {
    */
   const country = req.header("x-country-alpha-2");
   const language = req.header("x-language-alpha-2");
+  const user_id = req.header("x-user-id");
 
   const client_id = req.client.client_detail_id;
   const currentEmail = req.client.email;
@@ -72,7 +73,14 @@ router.put("/", populateClient, async (req, res, next) => {
   return await updateClientDataSchema(language)
     .noUnknown(true)
     .strict()
-    .validate({ country, language, client_id, currentEmail, ...payload })
+    .validate({
+      country,
+      language,
+      user_id,
+      client_id,
+      currentEmail,
+      ...payload,
+    })
     .then(updateClientData)
     .then((result) => res.status(200).send(result))
     .catch(next);
@@ -118,6 +126,7 @@ router.put("/image", populateClient, populateUser, async (req, res, next) => {
    */
   const country = req.header("x-country-alpha-2");
   const language = req.header("x-language-alpha-2");
+  const user_id = req.header("x-user-id");
 
   const client_id = req.client.client_detail_id;
 
@@ -126,7 +135,7 @@ router.put("/image", populateClient, populateUser, async (req, res, next) => {
   return await updateClientImageSchema
     .noUnknown(true)
     .strict()
-    .validate({ country, language, client_id, image })
+    .validate({ country, language, client_id, user_id, image })
     .then(updateClientImage)
     .then((result) => res.status(200).send(result))
     .catch(next);
@@ -139,13 +148,14 @@ router.delete("/image", populateClient, async (req, res, next) => {
    */
   const country = req.header("x-country-alpha-2");
   const language = req.header("x-language-alpha-2");
+  const user_id = req.header("x-user-id");
 
   const client_id = req.client.client_detail_id;
 
   return await deleteClientImageSchema
     .noUnknown(true)
     .strict()
-    .validate({ country, language, client_id })
+    .validate({ country, language, client_id, user_id })
     .then(deleteClientImage)
     .then((result) => res.status(200).send(result))
     .catch(next);
@@ -161,6 +171,7 @@ router.put(
      */
     const country = req.header("x-country-alpha-2");
     const language = req.header("x-language-alpha-2");
+    const user_id = req.header("x-user-id");
 
     const client_id = req.client.client_detail_id;
     const payload = req.body;
@@ -168,7 +179,7 @@ router.put(
     return await updateClientDataProcessingSchema
       .noUnknown(true)
       .strict()
-      .validate({ country, language, client_id, ...payload })
+      .validate({ country, language, user_id, client_id, ...payload })
       .then(updateClientDataProcessing)
       .then((result) => res.status(200).send(result))
       .catch(next);
