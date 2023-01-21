@@ -1,0 +1,19 @@
+import * as yup from "yup";
+
+export const getMoodTrackForTodaySchema = yup.object().shape({
+  client_id: yup.string().uuid().required(),
+  country: yup.string().required(),
+});
+
+export const addMoodTrackForTodaySchema = yup.object().shape({
+  country: yup.string().required(),
+  client_id: yup.string().uuid().required(),
+  mood: yup.string().required(),
+  comment: yup.string().notRequired(),
+});
+
+export const getMoodTrackForWeekSchema = yup.object().shape({
+  country: yup.string().required(),
+  client_id: yup.string().uuid().required(),
+  startDate: yup.string().required(),
+});
