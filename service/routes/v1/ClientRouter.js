@@ -9,6 +9,8 @@ import {
   updateClientImageSchema,
   updateClientDataProcessingSchema,
   deleteClientImageSchema,
+  addInformationPortalSuggestionSchema,
+  addClientRatingSchema,
 } from "#schemas/clientSchemas";
 
 import {
@@ -18,6 +20,8 @@ import {
   updateClientImage,
   updateClientDataProcessing,
   deleteClientImage,
+  addInformationPortalSuggestion,
+  addClientRating,
 } from "#controllers/clients";
 
 const router = express.Router();
@@ -185,5 +189,46 @@ router.put(
       .catch(next);
   }
 );
+
+router
+  .route("/information-portal-suggestion")
+  .post(populateUser, async (req, res, next) => {
+    /**
+     * #route   POST /client/v1/client/information-portal-suggestion
+     * #desc    Send a suggestion to the information portal
+     */
+    const country = req.header("x-country-alpha-2");
+    const client_id = req.user.client_detail_id;
+
+    const payload = req.body;
+
+    return await addInformationPortalSuggestionSchema
+      .noUnknown(true)
+      .strict()
+      .validate({ country, client_id, ...payload })
+      .then(addInformationPortalSuggestion)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  });
+
+router.post("/add-rating", populateUser, async (req, res, next) => {
+  /**
+   * #route   POST /client/v1/client/add-rating
+   * #desc    Add rating for client
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+
+  const client_id = req.user.client_detail_id;
+  const payload = req.body;
+
+  return await addClientRatingSchema
+    .noUnknown(true)
+    .strict()
+    .validate({ country, language, client_id, ...payload })
+    .then(addClientRating)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
 
 export { router };

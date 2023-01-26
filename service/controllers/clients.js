@@ -10,6 +10,8 @@ import {
   updateClientImageQuery,
   deleteClientImageQuery,
   updateClientDataProcessingQuery,
+  addClientRatingQuery,
+  addInformationPortalSuggestionQuery,
 } from "#queries/clients";
 
 import { clientNotFound, incorrectPassword, emailUsed } from "#utils/errors";
@@ -234,6 +236,44 @@ export const updateClientDataProcessing = async ({
 
         return res.rows[0];
       }
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const addInformationPortalSuggestion = async ({
+  country,
+  client_id,
+  suggestion,
+}) => {
+  return await addInformationPortalSuggestionQuery({
+    poolCountry: country,
+    client_id,
+    suggestion,
+  })
+    .then(() => {
+      return { success: true };
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const addClientRating = async ({
+  country,
+  client_id,
+  rating,
+  comment,
+}) => {
+  return await addClientRatingQuery({
+    poolCountry: country,
+    client_id,
+    rating,
+    comment,
+  })
+    .then(() => {
+      return { success: true };
     })
     .catch((err) => {
       throw err;

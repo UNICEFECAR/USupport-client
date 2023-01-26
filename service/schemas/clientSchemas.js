@@ -81,3 +81,17 @@ export const getClientByIdSchema = yup.object().shape({
   country: yup.string().required(),
   language: yup.string().required(),
 });
+
+export const addInformationPortalSuggestionSchema = yup.object().shape({
+  client_id: yup.string().uuid().required(),
+  country: yup.string().required(),
+  suggestion: yup.string().required(),
+});
+
+export const addClientRatingSchema = yup.object().shape({
+  language: yup.string().required(),
+  country: yup.string().required(),
+  client_id: yup.string().uuid().required(),
+  rating: yup.number().min(1).max(5).required(),
+  comment: yup.string().notRequired(),
+});

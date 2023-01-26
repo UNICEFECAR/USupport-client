@@ -169,3 +169,30 @@ export const updateClientDataProcessingQuery = async ({
       `,
     [dataProcessing, client_id]
   );
+
+export const addInformationPortalSuggestionQuery = async ({
+  poolCountry,
+  client_id,
+  suggestion,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+      INSERT INTO information_portal_suggestion (client_detail_id, suggestion)
+      VALUES ($1, $2)   
+    `,
+    [client_id, suggestion]
+  );
+
+export const addClientRatingQuery = async ({
+  poolCountry,
+  client_id,
+  rating,
+  comment,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+      INSERT INTO client_rating (client_detail_id, rating, comment)
+      VALUES ($1, $2, $3)
+    `,
+    [client_id, rating, comment]
+  );
