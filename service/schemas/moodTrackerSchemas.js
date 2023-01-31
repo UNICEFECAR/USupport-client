@@ -5,15 +5,11 @@ export const getMoodTrackForTodaySchema = yup.object().shape({
   country: yup.string().required(),
 });
 
-export const addMoodTrackForTodaySchema = yup.object().shape({
-  country: yup.string().required(),
-  client_id: yup.string().uuid().required(),
+export const addMoodTrackForTodaySchema = getMoodTrackForTodaySchema.shape({
   mood: yup.string().required(),
   comment: yup.string().notRequired(),
 });
 
-export const getMoodTrackForWeekSchema = yup.object().shape({
-  country: yup.string().required(),
-  client_id: yup.string().uuid().required(),
+export const getMoodTrackForWeekSchema = getMoodTrackForTodaySchema.shape({
   startDate: yup.string().required(),
 });
