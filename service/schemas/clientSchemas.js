@@ -43,43 +43,31 @@ export const updateClientDataSchema = (language) =>
     ["userAccessToken", "email"]
   );
 
-export const deleteClientDataSchema = yup.object().shape({
+export const getClientByIdSchema = yup.object().shape({
   client_id: yup.string().uuid().required(),
-  user_id: yup.string().uuid().required(),
   country: yup.string().required(),
   language: yup.string().required(),
+});
+
+export const deleteClientDataSchema = getClientByIdSchema.shape({
+  user_id: yup.string().uuid().required(),
   image: yup.string().required(),
   userPassword: yup.string().required(),
   password: yup.string().required(),
 });
 
-export const updateClientImageSchema = yup.object().shape({
-  client_id: yup.string().uuid().required(),
+export const updateClientImageSchema = getClientByIdSchema.shape({
   user_id: yup.string().uuid().required(),
-  country: yup.string().required(),
-  language: yup.string().required(),
   image: yup.string().required(),
 });
 
-export const deleteClientImageSchema = yup.object().shape({
-  client_id: yup.string().uuid().required(),
+export const deleteClientImageSchema = getClientByIdSchema.shape({
   user_id: yup.string().uuid().required(),
-  country: yup.string().required(),
-  language: yup.string().required(),
 });
 
-export const updateClientDataProcessingSchema = yup.object().shape({
-  client_id: yup.string().uuid().required(),
+export const updateClientDataProcessingSchema = getClientByIdSchema.shape({
   user_id: yup.string().uuid().required(),
-  country: yup.string().required(),
-  language: yup.string().required(),
   dataProcessing: yup.boolean().required(),
-});
-
-export const getClientByIdSchema = yup.object().shape({
-  clientId: yup.string().uuid().required(),
-  country: yup.string().required(),
-  language: yup.string().required(),
 });
 
 export const addInformationPortalSuggestionSchema = yup.object().shape({
@@ -88,10 +76,7 @@ export const addInformationPortalSuggestionSchema = yup.object().shape({
   suggestion: yup.string().required(),
 });
 
-export const addClientRatingSchema = yup.object().shape({
-  language: yup.string().required(),
-  country: yup.string().required(),
-  client_id: yup.string().uuid().required(),
+export const addClientRatingSchema = getClientByIdSchema.shape({
   rating: yup.number().min(1).max(5).required(),
   comment: yup.string().notRequired(),
 });

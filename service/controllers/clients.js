@@ -22,10 +22,26 @@ const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 const AWS_REGION = process.env.AWS_REGION;
 const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 
-export const getClientById = async ({ country, language, clientId }) => {
+const handleClientQueryResponse = async ({
+  res,
+  language,
+  country,
+  user_id,
+}) => {
+  if (res.rowCount === 0) {
+    throw clientNotFound(language);
+  } else {
+    const cacheKey = `client_${country}_${user_id}`;
+    await deleteCacheItem(cacheKey);
+
+    return res.rows[0];
+  }
+};
+
+export const getClientById = async ({ country, language, client_id }) => {
   return await getClientByIdQuery({
     poolCountry: country,
-    clientId,
+    client_id,
   })
     .then((res) => {
       if (res.rowCount === 0) {
@@ -81,16 +97,9 @@ export const updateClientData = async ({
     yearOfBirth,
     urbanRural,
   })
-    .then(async (res) => {
-      if (res.rowCount === 0) {
-        throw clientNotFound(language);
-      } else {
-        const cacheKey = `client_${country}_${user_id}`;
-        await deleteCacheItem(cacheKey);
-
-        return res.rows[0];
-      }
-    })
+    .then(async (res) =>
+      handleClientQueryResponse({ res, language, country, user_id })
+    )
     .catch((err) => {
       throw err;
     });
@@ -175,16 +184,9 @@ export const updateClientImage = async ({
     client_id,
     image,
   })
-    .then(async (res) => {
-      if (res.rowCount === 0) {
-        throw clientNotFound(language);
-      } else {
-        const cacheKey = `client_${country}_${user_id}`;
-        await deleteCacheItem(cacheKey);
-
-        return res.rows[0];
-      }
-    })
+    .then(async (res) =>
+      handleClientQueryResponse({ res, language, country, user_id })
+    )
     .catch((err) => {
       throw err;
     });
@@ -200,16 +202,9 @@ export const deleteClientImage = async ({
     poolCountry: country,
     client_id,
   })
-    .then(async (res) => {
-      if (res.rowCount === 0) {
-        throw clientNotFound(language);
-      } else {
-        const cacheKey = `client_${country}_${user_id}`;
-        await deleteCacheItem(cacheKey);
-
-        return res.rows[0];
-      }
-    })
+    .then(async (res) =>
+      handleClientQueryResponse({ res, language, country, user_id })
+    )
     .catch((err) => {
       throw err;
     });
@@ -227,16 +222,9 @@ export const updateClientDataProcessing = async ({
     client_id,
     dataProcessing,
   })
-    .then(async (res) => {
-      if (res.rowCount === 0) {
-        throw clientNotFound(language);
-      } else {
-        const cacheKey = `client_${country}_${user_id}`;
-        await deleteCacheItem(cacheKey);
-
-        return res.rows[0];
-      }
-    })
+    .then(async (res) =>
+      handleClientQueryResponse({ res, language, country, user_id })
+    )
     .catch((err) => {
       throw err;
     });
