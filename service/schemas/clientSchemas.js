@@ -95,3 +95,10 @@ export const addClientRatingSchema = yup.object().shape({
   rating: yup.number().min(1).max(5).required(),
   comment: yup.string().notRequired(),
 });
+
+export const addClientPushNotificationTokenSchema = yup.object().shape({
+  client_id: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+  pushNotificationToken: yup.string().required(),
+});

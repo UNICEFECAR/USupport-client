@@ -12,6 +12,7 @@ import {
   updateClientDataProcessingQuery,
   addClientRatingQuery,
   addInformationPortalSuggestionQuery,
+  addClientPushNotificationTokenQuery,
 } from "#queries/clients";
 
 import { clientNotFound, incorrectPassword, emailUsed } from "#utils/errors";
@@ -52,6 +53,7 @@ export const updateClientData = async ({
   sex,
   yearOfBirth,
   urbanRural,
+  pushNotificationTokens,
 }) => {
   // Check if email is changed
   if (email !== currentEmail) {
@@ -80,6 +82,7 @@ export const updateClientData = async ({
     sex,
     yearOfBirth,
     urbanRural,
+    pushNotificationTokens,
   })
     .then(async (res) => {
       if (res.rowCount === 0) {
@@ -271,6 +274,24 @@ export const addClientRating = async ({
     client_id,
     rating,
     comment,
+  })
+    .then(() => {
+      return { success: true };
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const addClientPushNotificationToken = async ({
+  country,
+  client_id,
+  pushNotificationToken,
+}) => {
+  return await addClientPushNotificationTokenQuery({
+    poolCountry: country,
+    client_id,
+    pushNotificationToken,
   })
     .then(() => {
       return { success: true };

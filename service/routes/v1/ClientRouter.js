@@ -11,6 +11,7 @@ import {
   deleteClientImageSchema,
   addInformationPortalSuggestionSchema,
   addClientRatingSchema,
+  addClientPushNotificationTokenSchema,
 } from "#schemas/clientSchemas";
 
 import {
@@ -22,6 +23,7 @@ import {
   deleteClientImage,
   addInformationPortalSuggestion,
   addClientRating,
+  addClientPushNotificationToken,
 } from "#controllers/clients";
 
 const router = express.Router();
@@ -230,5 +232,29 @@ router.post("/add-rating", populateUser, async (req, res, next) => {
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
+
+router.put(
+  "/add-push-notification-token",
+  populateUser,
+  async (req, res, next) => {
+    /**
+     * #route   PUT /client/v1/client/add-push-notification-token
+     * #desc    Add push notification token for client
+     */
+    const country = req.header("x-country-alpha-2");
+    const language = req.header("x-language-alpha-2");
+
+    const client_id = req.user.client_detail_id;
+    const payload = req.body;
+
+    return await addClientPushNotificationTokenSchema
+      .noUnknown(true)
+      .strict()
+      .validate({ country, language, client_id, ...payload })
+      .then(addClientPushNotificationToken)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  }
+);
 
 export { router };

@@ -4,7 +4,7 @@ export const getClientByIdQuery = async ({ poolCountry, clientId }) =>
   await getDBPool("piiDb", poolCountry).query(
     `
 
-      SELECT client_detail_id, name, surname, nickname, email, image
+      SELECT client_detail_id, name, surname, nickname, email, image, push_notification_tokens
       FROM client_detail
       WHERE client_detail_id = $1
       LIMIT 1;
@@ -26,7 +26,7 @@ export const getClientByUserID = async (poolCountry, user_id) =>
 
     ), clientData AS (
 
-        SELECT client_detail."client_detail_id", "name", surname, nickname, email, image, sex, year_of_birth, urban_rural, data_processing, access_token
+        SELECT client_detail."client_detail_id", "name", surname, nickname, email, image, sex, year_of_birth, urban_rural, data_processing, access_token, push_notification_tokens
         FROM client_detail
           JOIN userData ON userData.client_detail_id = client_detail.client_detail_id
         ORDER BY client_detail.created_at DESC
@@ -59,6 +59,7 @@ export const updateClientDataQuery = async ({
   sex,
   yearOfBirth,
   urbanRural,
+  pushNotificationTokens,
 }) =>
   await getDBPool("piiDb", poolCountry).query(
     `
@@ -69,11 +70,22 @@ export const updateClientDataQuery = async ({
           email = $4, 
           sex = $5,
           year_of_birth = $6,
-          urban_rural = $7
-      WHERE client_detail_id = $8
+          urban_rural = $7,
+          push_notification_tokens = $8
+      WHERE client_detail_id = $9
       RETURNING *;
     `,
-    [name, surname, nickname, email, sex, yearOfBirth, urbanRural, client_id]
+    [
+      name,
+      surname,
+      nickname,
+      email,
+      sex,
+      yearOfBirth,
+      urbanRural,
+      pushNotificationTokens,
+      client_id,
+    ]
   );
 
 export const deleteClientDataQuery = async ({
@@ -195,4 +207,19 @@ export const addClientRatingQuery = async ({
       VALUES ($1, $2, $3)
     `,
     [client_id, rating, comment]
+  );
+
+export const addClientPushNotificationTokenQuery = async ({
+  poolCountry,
+  client_id,
+  pushNotificationToken,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+      UPDATE client_detail
+      SET push_notification_tokens = (SELECT array_agg(distinct e) FROM UNNEST(push_notification_tokens || $1::VARCHAR) e)
+      WHERE client_detail_id = $2
+      RETURNING *;
+    `,
+    [pushNotificationToken, client_id]
   );
