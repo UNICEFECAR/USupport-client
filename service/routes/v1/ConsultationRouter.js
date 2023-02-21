@@ -5,8 +5,7 @@ import { populateUser } from "#middlewares/populateMiddleware";
 import {
   getAllConsultationsSchema,
   getSecurityCheckAnswersByConsultationIdSchema,
-  addSecurityCheckAnswersSchema,
-  updateSecurityCheckAnswersSchema,
+  securityCheckAnswersSchema,
 } from "#schemas/consultationSchemas";
 
 import {
@@ -37,58 +36,55 @@ router.route("/all").get(populateUser, async (req, res, next) => {
     .catch(next);
 });
 
-router.route("/security-check").get(async (req, res, next) => {
-  /**
-   * #route   GET /client/v1/consultation/security-check
-   * #desc    Get security check answers for a consultation
-   */
-  const country = req.header("x-country-alpha-2");
+router
+  .route("/security-check")
+  .get(async (req, res, next) => {
+    /**
+     * #route   GET /client/v1/consultation/security-check
+     * #desc    Get security check answers for a consultation
+     */
+    const country = req.header("x-country-alpha-2");
+    const consultation_id = req.query.consultationId;
 
-  const consultation_id = req.query.consultationId;
+    return await getSecurityCheckAnswersByConsultationIdSchema
+      .noUnknown(true)
+      .strict(true)
+      .validate({ country, consultation_id })
+      .then(getSecurityCheckAnswersByConsultationId)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  })
+  .post(async (req, res, next) => {
+    /**
+     * #route   POST /client/v1/consultation/security-check
+     * #desc    Create security check answers for a consultation
+     */
+    const country = req.header("x-country-alpha-2");
+    const payload = req.body;
 
-  return await getSecurityCheckAnswersByConsultationIdSchema
-    .noUnknown(true)
-    .strict(true)
-    .validate({ country, consultation_id })
-    .then(getSecurityCheckAnswersByConsultationId)
-    .then((result) => res.status(200).send(result))
-    .catch(next);
-});
+    return await securityCheckAnswersSchema
+      .noUnknown(true)
+      .strict(true)
+      .validate({ ...payload, country })
+      .then(addSecurityCheckAnswers)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  })
+  .put(async (req, res, next) => {
+    /**
+     * #route   PUT /client/v1/consultation/security-check
+     * #desc    Update security check answers for a consultation
+     */
+    const country = req.header("x-country-alpha-2");
+    const payload = req.body;
 
-router.route("/security-check").post(async (req, res, next) => {
-  /**
-   * #route   POST /client/v1/consultation/security-check
-   * #desc    Create security check answers for a consultation
-   */
-  const country = req.header("x-country-alpha-2");
-
-  const payload = req.body;
-
-  return await addSecurityCheckAnswersSchema
-    .noUnknown(true)
-    .strict(true)
-    .validate({ country, ...payload })
-    .then(addSecurityCheckAnswers)
-    .then((result) => res.status(200).send(result))
-    .catch(next);
-});
-
-router.route("/security-check").put(async (req, res, next) => {
-  /**
-   * #route   PUT /client/v1/consultation/security-check
-   * #desc    Update security check answers for a consultation
-   */
-  const country = req.header("x-country-alpha-2");
-
-  const payload = req.body;
-
-  return await updateSecurityCheckAnswersSchema
-    .noUnknown(true)
-    .strict(true)
-    .validate({ country, ...payload })
-    .then(updateSecurityCheckAnswers)
-    .then((result) => res.status(200).send(result))
-    .catch(next);
-});
+    return await securityCheckAnswersSchema
+      .noUnknown(true)
+      .strict(true)
+      .validate({ ...payload, country })
+      .then(updateSecurityCheckAnswers)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  });
 
 export { router };

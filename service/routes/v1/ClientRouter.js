@@ -28,15 +28,78 @@ import {
 
 const router = express.Router();
 
-router.get("/", populateClient, async (req, res) => {
-  /**
-   * #route   GET /client/v1/client
-   * #desc    Get current client data
-   */
-  const clientData = req.client;
+router
+  .route("/")
+  .get(populateClient, async (req, res) => {
+    /**
+     * #route   GET /client/v1/client
+     * #desc    Get current client data
+     */
+    const clientData = req.client;
 
-  res.status(200).send(clientData);
-});
+    res.status(200).send(clientData);
+  })
+  .put(populateClient, async (req, res, next) => {
+    /**
+     * #route   PUT /client/v1/client
+     * #desc    Update current client data
+     */
+    const country = req.header("x-country-alpha-2");
+    const language = req.header("x-language-alpha-2");
+    const user_id = req.header("x-user-id");
+
+    const client_id = req.client.client_detail_id;
+    const currentEmail = req.client.email;
+
+    const payload = req.body;
+
+    return await updateClientDataSchema(language)
+      .noUnknown(true)
+      .strict()
+      .validate({
+        ...payload,
+        country,
+        language,
+        user_id,
+        client_id,
+        currentEmail,
+      })
+      .then(updateClientData)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  })
+  .delete(populateClient, populateUser, async (req, res, next) => {
+    /**
+     * #route   DELETE /client/v1/client
+     * #desc    Delete current client data
+     */
+    const country = req.header("x-country-alpha-2");
+    const language = req.header("x-language-alpha-2");
+
+    const client_id = req.client.client_detail_id;
+    const image = req.client.image;
+
+    const user_id = req.user.user_id;
+    const userPassword = req.user.password;
+
+    const payload = req.body;
+
+    return await deleteClientDataSchema
+      .noUnknown(true)
+      .strict()
+      .validate({
+        ...payload,
+        country,
+        language,
+        client_id,
+        user_id,
+        image,
+        userPassword,
+      })
+      .then(deleteClientData)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  });
 
 router.get("/by-id", async (req, res, next) => {
   /**
@@ -47,125 +110,58 @@ router.get("/by-id", async (req, res, next) => {
   const country = req.header("x-country-alpha-2");
   const language = req.header("x-language-alpha-2");
 
-  const clientId = req.query.clientId;
+  const client_id = req.query.clientId;
 
   return await getClientByIdSchema
     .noUnknown(true)
     .strict()
-    .validate({
-      country,
-      language,
-      clientId,
-    })
+    .validate({ country, language, client_id })
     .then(getClientById)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
 
-router.put("/", populateClient, async (req, res, next) => {
-  /**
-   * #route   PUT /client/v1/client
-   * #desc    Update current client data
-   */
-  const country = req.header("x-country-alpha-2");
-  const language = req.header("x-language-alpha-2");
-  const user_id = req.header("x-user-id");
+router
+  .route("/image")
+  .put(populateClient, populateUser, async (req, res, next) => {
+    /**
+     * #route   PUT /client/v1/client/image
+     * #desc    Update the client image
+     */
+    const country = req.header("x-country-alpha-2");
+    const language = req.header("x-language-alpha-2");
+    const user_id = req.header("x-user-id");
 
-  const client_id = req.client.client_detail_id;
-  const currentEmail = req.client.email;
+    const client_id = req.client.client_detail_id;
+    const image = req.body.image;
 
-  const payload = req.body;
+    return await updateClientImageSchema
+      .noUnknown(true)
+      .strict()
+      .validate({ country, language, client_id, user_id, image })
+      .then(updateClientImage)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  })
+  .delete(populateClient, async (req, res, next) => {
+    /**
+     * #route   DELETE /client/v1/client/image
+     * #desc    Delete the client image
+     */
+    const country = req.header("x-country-alpha-2");
+    const language = req.header("x-language-alpha-2");
+    const user_id = req.header("x-user-id");
 
-  return await updateClientDataSchema(language)
-    .noUnknown(true)
-    .strict()
-    .validate({
-      country,
-      language,
-      user_id,
-      client_id,
-      currentEmail,
-      ...payload,
-    })
-    .then(updateClientData)
-    .then((result) => res.status(200).send(result))
-    .catch(next);
-});
+    const client_id = req.client.client_detail_id;
 
-router.delete("/", populateClient, populateUser, async (req, res, next) => {
-  /**
-   * #route   DELETE /client/v1/client
-   * #desc    Delete current client data
-   */
-  const country = req.header("x-country-alpha-2");
-  const language = req.header("x-language-alpha-2");
-
-  const client_id = req.client.client_detail_id;
-  const image = req.client.image;
-
-  const user_id = req.user.user_id;
-  const userPassword = req.user.password;
-
-  const payload = req.body;
-
-  return await deleteClientDataSchema
-    .noUnknown(true)
-    .strict()
-    .validate({
-      country,
-      language,
-      client_id,
-      user_id,
-      image,
-      userPassword,
-      ...payload,
-    })
-    .then(deleteClientData)
-    .then((result) => res.status(200).send(result))
-    .catch(next);
-});
-
-router.put("/image", populateClient, populateUser, async (req, res, next) => {
-  /**
-   * #route   PUT /client/v1/client/image
-   * #desc    Update the client image
-   */
-  const country = req.header("x-country-alpha-2");
-  const language = req.header("x-language-alpha-2");
-  const user_id = req.header("x-user-id");
-
-  const client_id = req.client.client_detail_id;
-
-  const image = req.body.image;
-
-  return await updateClientImageSchema
-    .noUnknown(true)
-    .strict()
-    .validate({ country, language, client_id, user_id, image })
-    .then(updateClientImage)
-    .then((result) => res.status(200).send(result))
-    .catch(next);
-});
-
-router.delete("/image", populateClient, async (req, res, next) => {
-  /**
-   * #route   DELETE /client/v1/client/image
-   * #desc    Delete the client image
-   */
-  const country = req.header("x-country-alpha-2");
-  const language = req.header("x-language-alpha-2");
-  const user_id = req.header("x-user-id");
-
-  const client_id = req.client.client_detail_id;
-
-  return await deleteClientImageSchema
-    .noUnknown(true)
-    .strict()
-    .validate({ country, language, client_id, user_id })
-    .then(deleteClientImage)
-    .then((result) => res.status(200).send(result))
-    .catch(next);
-});
+    return await deleteClientImageSchema
+      .noUnknown(true)
+      .strict()
+      .validate({ country, language, client_id, user_id })
+      .then(deleteClientImage)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  });
 
 router.put(
   "/data-processing-agreement",
@@ -185,33 +181,34 @@ router.put(
     return await updateClientDataProcessingSchema
       .noUnknown(true)
       .strict()
-      .validate({ country, language, user_id, client_id, ...payload })
+      .validate({ ...payload, country, language, user_id, client_id })
       .then(updateClientDataProcessing)
       .then((result) => res.status(200).send(result))
       .catch(next);
   }
 );
 
-router
-  .route("/information-portal-suggestion")
-  .post(populateUser, async (req, res, next) => {
+router.post(
+  "/information-portal-suggestion",
+  populateUser,
+  async (req, res, next) => {
     /**
      * #route   POST /client/v1/client/information-portal-suggestion
      * #desc    Send a suggestion to the information portal
      */
     const country = req.header("x-country-alpha-2");
     const client_id = req.user.client_detail_id;
-
     const payload = req.body;
 
     return await addInformationPortalSuggestionSchema
       .noUnknown(true)
       .strict()
-      .validate({ country, client_id, ...payload })
+      .validate({ ...payload, country, client_id })
       .then(addInformationPortalSuggestion)
       .then((result) => res.status(200).send(result))
       .catch(next);
-  });
+  }
+);
 
 router.post("/add-rating", populateUser, async (req, res, next) => {
   /**
@@ -227,7 +224,7 @@ router.post("/add-rating", populateUser, async (req, res, next) => {
   return await addClientRatingSchema
     .noUnknown(true)
     .strict()
-    .validate({ country, language, client_id, ...payload })
+    .validate({ ...payload, country, language, client_id })
     .then(addClientRating)
     .then((result) => res.status(200).send(result))
     .catch(next);

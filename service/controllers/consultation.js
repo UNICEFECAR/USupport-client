@@ -14,13 +14,7 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
     poolCountry: country,
     client_id,
   })
-    .then((res) => {
-      if (res.rowCount === 0) {
-        return [];
-      } else {
-        return res.rows;
-      }
-    })
+    .then((res) => res.rows)
     .catch((err) => {
       throw err;
     });
@@ -88,13 +82,7 @@ export const getSecurityCheckAnswersByConsultationId = async ({
     poolCountry: country,
     consultation_id,
   })
-    .then((res) => {
-      if (res.rowCount === 0) {
-        return {};
-      } else {
-        return res.rows[0];
-      }
-    })
+    .then((res) => (res.rowCount === 0 ? {} : res.rows[0]))
     .catch((err) => {
       throw err;
     });
@@ -102,61 +90,23 @@ export const getSecurityCheckAnswersByConsultationId = async ({
   return answers;
 };
 
-export const addSecurityCheckAnswers = async ({
-  country,
-  consultationId,
-  contactsDisclosure,
-  suggestOutsideMeeting,
-  identityCoercion,
-  unsafeFeeling,
-  moreDetails,
-}) => {
+export const addSecurityCheckAnswers = async (props) => {
   return await addSecurityCheckAnswersQuery({
-    poolCountry: country,
-    consultationId,
-    contactsDisclosure,
-    suggestOutsideMeeting,
-    identityCoercion,
-    unsafeFeeling,
-    moreDetails,
+    ...props,
+    poolCountry: props.country,
   })
-    .then((res) => {
-      if (res.rowCount === 0) {
-        return {};
-      } else {
-        return res.rows[0];
-      }
-    })
+    .then((res) => (res.rowCount === 0 ? {} : res.rows[0]))
     .catch((err) => {
       throw err;
     });
 };
 
-export const updateSecurityCheckAnswers = async ({
-  country,
-  consultationId,
-  contactsDisclosure,
-  suggestOutsideMeeting,
-  identityCoercion,
-  unsafeFeeling,
-  moreDetails,
-}) => {
+export const updateSecurityCheckAnswers = async (props) => {
   return await updateSecurityCheckAnswersQuery({
-    poolCountry: country,
-    consultationId,
-    contactsDisclosure,
-    suggestOutsideMeeting,
-    identityCoercion,
-    unsafeFeeling,
-    moreDetails,
+    ...props,
+    poolCountry: props.country,
   })
-    .then((res) => {
-      if (res.rowCount === 0) {
-        return {};
-      } else {
-        return res.rows[0];
-      }
-    })
+    .then((res) => (res.rowCount === 0 ? {} : res.rows[0]))
     .catch((err) => {
       throw err;
     });

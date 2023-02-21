@@ -8,28 +8,19 @@ export const getMoodTrackForToday = async ({ country, client_id }) => {
   const moodTracks = await getMoodTrackForTodayQuery({
     poolCountry: country,
     client_id,
-  }).then((res) => {
-    if (res.rowCount === 0) {
-      return [];
-    } else {
-      return res.rows;
-    }
-  });
+  })
+    .then((res) => res.rows)
+    .catch((err) => {
+      throw err;
+    });
 
   return moodTracks;
 };
 
-export const addMoodTrackForToday = async ({
-  country,
-  client_id,
-  mood,
-  comment,
-}) => {
+export const addMoodTrackForToday = async (props) => {
   await addMoodTrackForTodayQuery({
-    poolCountry: country,
-    client_id,
-    mood,
-    comment,
+    ...props,
+    poolCountry: props.country,
   }).catch((err) => {
     throw err;
   });
@@ -37,22 +28,17 @@ export const addMoodTrackForToday = async ({
   return { success: true };
 };
 
-export const getMoodTrackForWeek = async ({
-  country,
-  client_id,
-  startDate,
-}) => {
-  const date = new Date(Number(startDate) * 1000);
+export const getMoodTrackForWeek = async (props) => {
+  const date = new Date(Number(props.startDate) * 1000);
   const moodTracks = await getMoodTrackForWeekQuery({
-    poolCountry: country,
-    client_id,
+    poolCountry: props.country,
+    client_id: props.client_id,
     startDate: date,
-  }).then((res) => {
-    if (res.rowCount === 0) {
-      return [];
-    } else {
-      return res.rows;
-    }
-  });
+  })
+    .then((res) => res.rows)
+    .catch((err) => {
+      throw err;
+    });
+
   return moodTracks;
 };

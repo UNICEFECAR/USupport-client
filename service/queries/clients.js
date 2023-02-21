@@ -1,6 +1,6 @@
 import { getDBPool } from "#utils/dbConfig";
 
-export const getClientByIdQuery = async ({ poolCountry, clientId }) =>
+export const getClientByIdQuery = async ({ poolCountry, client_id }) =>
   await getDBPool("piiDb", poolCountry).query(
     `
 
@@ -10,7 +10,7 @@ export const getClientByIdQuery = async ({ poolCountry, clientId }) =>
       LIMIT 1;
       
     `,
-    [clientId]
+    [client_id]
   );
 
 export const getClientByUserID = async (poolCountry, user_id) =>
