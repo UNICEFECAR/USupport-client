@@ -223,3 +223,49 @@ export const addClientPushNotificationTokenQuery = async ({
     `,
     [pushNotificationToken, client_id]
   );
+
+export const checkIsCouponAvailableQuery = async ({
+  poolCountry,
+  couponCode,
+}) => {
+  return await getDBPool("piiDb", poolCountry).query(
+    `
+        SELECT campaign_id, coupon_code, max_coupons_per_client, no_coupons, active, start_date, end_date
+        FROM campaign
+        WHERE coupon_code = $1 AND NOW() BETWEEN start_date AND end_date AND active = true
+        LIMIT 1;
+    `,
+    [couponCode]
+  );
+};
+
+export const getClientCampaignConsultationsQuery = async ({
+  poolCountry,
+  client_detail_id,
+  campaign_id,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+        SELECT COUNT(*) AS count
+        FROM consultation
+          JOIN transaction_log ON transaction_log.consultation_id = consultation.consultation_id AND transaction_log.campaign_id = $2
+        WHERE client_detail_id = $1 AND (consultation.status = 'finished' OR consultation.status = 'scheduled')
+    `,
+    [client_detail_id, campaign_id]
+  );
+};
+
+export const getTotalCampaignConsultationsQuery = async ({
+  poolCountry,
+  campaign_id,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+        SELECT COUNT(*) AS count
+        FROM consultation
+          JOIN transaction_log ON transaction_log.consultation_id = consultation.consultation_id AND transaction_log.campaign_id = $1
+        WHERE consultation.status = 'finished' OR consultation.status = 'scheduled'
+    `,
+    [campaign_id]
+  );
+};

@@ -74,6 +74,7 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
       time: consultation.time,
       status: consultation.status,
       price: consultation.price,
+      campaign_id: consultation.campaign_id,
     });
   }
 

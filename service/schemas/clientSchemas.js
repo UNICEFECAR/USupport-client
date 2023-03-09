@@ -102,3 +102,10 @@ export const addClientPushNotificationTokenSchema = yup.object().shape({
   language: yup.string().required(),
   pushNotificationToken: yup.string().required(),
 });
+
+export const checkIsCouponAvailableSchema = yup.object().shape({
+  client_detail_id: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+  couponCode: yup.string().required(),
+});

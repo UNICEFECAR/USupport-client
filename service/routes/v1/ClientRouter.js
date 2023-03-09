@@ -12,6 +12,7 @@ import {
   addInformationPortalSuggestionSchema,
   addClientRatingSchema,
   addClientPushNotificationTokenSchema,
+  checkIsCouponAvailableSchema,
 } from "#schemas/clientSchemas";
 
 import {
@@ -24,6 +25,7 @@ import {
   addInformationPortalSuggestion,
   addClientRating,
   addClientPushNotificationToken,
+  checkIsCouponAvailable,
 } from "#controllers/clients";
 
 const router = express.Router();
@@ -256,5 +258,26 @@ router.put(
       .catch(next);
   }
 );
+
+router.get("/check-coupon", populateUser, async (req, res, next) => {
+  /**
+   * #route   GET /client/v1/client/check-coupon
+   * #desc    Check coupon
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+
+  const client_detail_id = req.user.client_detail_id;
+
+  const { couponCode } = req.query;
+
+  return await checkIsCouponAvailableSchema
+    .noUnknown(true)
+    .strict()
+    .validate({ country, language, client_detail_id, couponCode })
+    .then(checkIsCouponAvailable)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
 
 export { router };

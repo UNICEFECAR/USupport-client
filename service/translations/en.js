@@ -6,4 +6,9 @@ export default {
   provider_not_found_error: "Provider not found",
   incorrect_password_error: "The provided password is incorrect",
   email_already_used_error: "This email is already used",
+  coupon_not_found_error: "Coupon not found",
+  client_limit_reached_error:
+    "You reached the maximum amount of consultations covered by this campaign",
+  coupons_limit_reached_error:
+    "The maximum amount of consultations covered by this campaign has been reached",
 };

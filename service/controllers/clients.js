@@ -13,9 +13,19 @@ import {
   addClientRatingQuery,
   addInformationPortalSuggestionQuery,
   addClientPushNotificationTokenQuery,
+  checkIsCouponAvailableQuery,
+  getClientCampaignConsultationsQuery,
+  getTotalCampaignConsultationsQuery,
 } from "#queries/clients";
 
-import { clientNotFound, incorrectPassword, emailUsed } from "#utils/errors";
+import {
+  clientNotFound,
+  incorrectPassword,
+  emailUsed,
+  couponNotFound,
+  clientLimitReached,
+  couponsLimitReached,
+} from "#utils/errors";
 import { deleteCacheItem } from "#utils/cache";
 
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
@@ -299,4 +309,74 @@ export const addClientPushNotificationToken = async ({
     .catch((err) => {
       throw err;
     });
+};
+
+export const checkIsCouponAvailable = async ({
+  country,
+  language,
+  couponCode,
+  client_detail_id,
+}) => {
+  const campaignData = await checkIsCouponAvailableQuery({
+    poolCountry: country,
+    couponCode,
+  })
+    .then((res) => {
+      if (res.rowCount === 0) {
+        throw couponNotFound(language);
+      } else {
+        return res.rows[0];
+      }
+    })
+    .catch((err) => {
+      throw err;
+    });
+
+  const clientCampaignConsultations = await getClientCampaignConsultationsQuery(
+    {
+      poolCountry: country,
+      client_detail_id,
+      campaign_id: campaignData.campaign_id,
+    }
+  ).then((res) => {
+    if (res.rowCount === 0) {
+      return 0;
+    } else {
+      return res.rows[0].count;
+    }
+  });
+
+  const totalCampaignConsultations = await getTotalCampaignConsultationsQuery({
+    poolCountry: country,
+    campaign_id: campaignData.campaign_id,
+  }).then((res) => {
+    if (res.rowCount === 0) {
+      return 0;
+    } else {
+      return res.rows[0].count;
+    }
+  });
+  console.log(clientCampaignConsultations, "clientConsultations");
+  const isClientLimitReached =
+    clientCampaignConsultations >= campaignData.max_coupons_per_client;
+  const isCouponsLimitReached =
+    totalCampaignConsultations >= campaignData.no_coupons;
+
+  if (isClientLimitReached) {
+    throw clientLimitReached(language);
+  }
+
+  if (isCouponsLimitReached) {
+    throw couponsLimitReached(language);
+  }
+
+  if (
+    campaignData.max_coupons_per_client > clientCampaignConsultations &&
+    campaignData.no_coupons > totalCampaignConsultations
+  ) {
+    return {
+      campaign_id: campaignData.campaign_id,
+      success: true,
+    };
+  }
 };
