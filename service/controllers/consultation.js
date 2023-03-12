@@ -6,6 +6,7 @@ import {
 } from "#queries/consultation";
 
 import { getProviderByIdQuery } from "#queries/providers";
+import { getSponsorNameAndImageByCampaignIdQuery } from "#queries/sponsors";
 
 import { providerNotFound } from "#utils/errors";
 
@@ -52,6 +53,28 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
       });
   }
 
+  const campaignIds = Array.from(
+    new Set(consultations.map((consultation) => consultation.campaign_id))
+  );
+
+  let sponsorsData;
+  if (campaignIds.length > 0) {
+    sponsorsData = await getSponsorNameAndImageByCampaignIdQuery({
+      poolCountry: country,
+      campaignIds,
+    })
+      .then((res) => {
+        if (res.rowCount === 0) {
+          return [];
+        } else {
+          return res.rows;
+        }
+      })
+      .catch((err) => {
+        throw err;
+      });
+  }
+
   let response = [];
 
   for (let i = 0; i < consultations.length; i++) {
@@ -62,7 +85,7 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
     const providerSurname =
       providersDetails[consultation.provider_detail_id].surname;
 
-    response.push({
+    const res = {
       consultation_id: consultation.consultation_id,
       chat_id: consultation.chat_id,
       provider_detail_id: consultation.provider_detail_id,
@@ -75,7 +98,17 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
       status: consultation.status,
       price: consultation.price,
       campaign_id: consultation.campaign_id,
-    });
+    };
+
+    if (consultation.campaign_id) {
+      const sponsorData = sponsorsData.find(
+        (sponsor) => sponsor.campaign_id === consultation.campaign_id
+      );
+      res.sponsor_name = sponsorData.sponsor_name;
+      res.sponsor_image = sponsorData.sponsor_image;
+    }
+
+    response.push(res);
   }
 
   return response;
