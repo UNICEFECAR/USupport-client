@@ -3,12 +3,13 @@ import {
   getSecurityCheckAnswersByConsultationIdQuery,
   addSecurityCheckAnswersQuery,
   updateSecurityCheckAnswersQuery,
+  unblockSlotQuery,
 } from "#queries/consultation";
 
 import { getProviderByIdQuery } from "#queries/providers";
 import { getSponsorNameAndImageByCampaignIdQuery } from "#queries/sponsors";
 
-import { providerNotFound } from "#utils/errors";
+import { providerNotFound, consultationNotFound } from "#utils/errors";
 
 export const getAllConsultations = async ({ country, language, client_id }) => {
   const consultations = await getAllConsultationsQuery({
@@ -189,6 +190,28 @@ export const updateSecurityCheckAnswers = async ({
         return {};
       } else {
         return res.rows[0];
+      }
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const unblockSlot = async ({
+  country,
+  consultationId,
+  client_id: clientDetailId,
+}) => {
+  return await unblockSlotQuery({
+    poolCountry: country,
+    consultationId,
+    clientDetailId,
+  })
+    .then((res) => {
+      if (res.rowCount === 0) {
+        throw consultationNotFound(language);
+      } else {
+        return { success: true };
       }
     })
     .catch((err) => {

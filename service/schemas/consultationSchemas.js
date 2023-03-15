@@ -32,3 +32,7 @@ export const updateSecurityCheckAnswersSchema = yup.object().shape({
   unsafeFeeling: yup.boolean().required(),
   moreDetails: yup.string().notRequired(),
 });
+
+export const unblockSlotSchema = getAllConsultationsSchema.shape({
+  consultationId: yup.string().uuid().required(),
+});

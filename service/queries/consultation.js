@@ -83,3 +83,19 @@ export const updateSecurityCheckAnswersQuery = async ({
       moreDetails,
     ]
   );
+
+export const unblockSlotQuery = async ({
+  poolCountry,
+  consultationId,
+  clientDetailId,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      UPDATE consultation
+      SET status = 'timeout'
+      WHERE consultation_id = $1 AND client_detail_id = $2
+      RETURNING *
+    `,
+    [consultationId, clientDetailId]
+  );
+};

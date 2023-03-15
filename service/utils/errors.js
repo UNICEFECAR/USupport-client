@@ -55,3 +55,11 @@ export const couponsLimitReached = (language) => {
   error.status = 403;
   return error;
 };
+
+export const consultationNotFound = (language) => {
+  const error = new Error();
+  error.message = t("consultation_not_found_error", language);
+  error.name = "CONSULTATION NOT FOUND";
+  error.status = 404;
+  return error;
+};
