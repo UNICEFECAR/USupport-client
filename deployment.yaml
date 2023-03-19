@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client
+  namespace: default
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: client
+  template:
+    metadata:
+      labels:
+        app: client
+    spec:
+      containers:
+      - name: client
+        image: {TODO: CHANGE}
+        imagePullPolicy: Always
+        envFrom:
+        - secretRef:
+          name: client-secrets
+        - configMapRef:
+            name: client-config
+        ports:
+        - containerPort: 3001
+      imagePullSecrets:
+      - name: regcred

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: client-config
+data:
+  NODE_ENV: production
+  PORT: 3001
+  AWS_REGION: eu-central-1
+  AWS_BUCKET_NAME: usupport-staging
+  REDIS_CACHE: redis://redis:6379
