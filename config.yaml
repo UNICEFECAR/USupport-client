@@ -4,7 +4,7 @@ metadata:
   name: client-config
 data:
   NODE_ENV: production
-  PORT: 3001
+  PORT: "3001"
   AWS_REGION: eu-central-1
   AWS_BUCKET_NAME: usupport-staging
-  REDIS_CACHE: redis://redis:6379
+  REDIS_CACHE: redis://redis-service:6379

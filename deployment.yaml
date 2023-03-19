@@ -17,11 +17,11 @@ spec:
     spec:
       containers:
       - name: client
-        image: {TODO: CHANGE}
+        image: 482053628475.dkr.ecr.eu-central-1.amazonaws.com/usupport-client-api
         imagePullPolicy: Always
         envFrom:
         - secretRef:
-          name: client-secrets
+            name: client-secrets
         - configMapRef:
             name: client-config
         ports:
