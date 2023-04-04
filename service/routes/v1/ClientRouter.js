@@ -82,12 +82,12 @@ router.put("/", populateClient, async (req, res, next) => {
     .noUnknown(true)
     .strict()
     .validate({
+      ...payload,
       country,
       language,
       user_id,
       client_id,
       currentEmail,
-      ...payload,
     })
     .then(updateClientData)
     .then((result) => res.status(200).send(result))

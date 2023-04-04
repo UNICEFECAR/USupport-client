@@ -1,7 +1,7 @@
 import {
   getMoodTrackForTodayQuery,
   addMoodTrackForTodayQuery,
-  getMoodTrackForWeekQuery,
+  getMoodTrackEntriesQuery,
 } from "#queries/moodTracker";
 
 export const getMoodTrackForToday = async ({ country, client_id }) => {
@@ -37,21 +37,31 @@ export const addMoodTrackForToday = async ({
   return { success: true };
 };
 
-export const getMoodTrackForWeek = async ({
+export const getMoodTrackEntries = async ({
   country,
   client_id,
-  startDate,
+  limit,
+  pageNum,
 }) => {
-  const date = new Date(Number(startDate) * 1000);
-  const moodTracks = await getMoodTrackForWeekQuery({
+  const limitToUse = limit === 0 ? 1 : limit;
+  const pageNumToUse = pageNum === 0 ? 1 : pageNum;
+  const offset = pageNum === 0 ? 0 : pageNumToUse * limitToUse;
+
+  const moodTracks = await getMoodTrackEntriesQuery({
     poolCountry: country,
     client_id,
-    startDate: date,
+    limit: limit * 2,
+    offset,
   }).then((res) => {
     if (res.rowCount === 0) {
-      return [];
+      return { currentEntries: [], previousEntries: [], hasMore: false };
     } else {
-      return res.rows;
+      const hasMore = res.rows.length >= limitToUse * 2;
+
+      const currentEntries = res.rows.slice(0, limit).reverse() || [];
+      const previousEntries = res.rows.slice(limit).reverse() || [];
+
+      return { currentEntries, previousEntries, hasMore };
     }
   });
   return moodTracks;
