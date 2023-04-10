@@ -7,6 +7,7 @@ import {
   getSecurityCheckAnswersByConsultationIdSchema,
   addSecurityCheckAnswersSchema,
   updateSecurityCheckAnswersSchema,
+  unblockSlotSchema,
 } from "#schemas/consultationSchemas";
 
 import {
@@ -14,6 +15,7 @@ import {
   getSecurityCheckAnswersByConsultationId,
   addSecurityCheckAnswers,
   updateSecurityCheckAnswers,
+  unblockSlot,
 } from "#controllers/consultation";
 
 const router = express.Router();
@@ -87,6 +89,25 @@ router.route("/security-check").put(async (req, res, next) => {
     .strict(true)
     .validate({ country, ...payload })
     .then(updateSecurityCheckAnswers)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.route("/unblock-slot").put(populateUser, async (req, res, next) => {
+  /**
+   * #route   PUT /provider/v1/consultation/unblock-slot
+   * #desc    Unblock a slot
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+  const clientDetailId = req.user.client_detail_id;
+  const { consultationId } = req.body;
+
+  return await unblockSlotSchema
+    .noUnknown(true)
+    .strict()
+    .validate({ country, language, client_id: clientDetailId, consultationId })
+    .then(unblockSlot)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });

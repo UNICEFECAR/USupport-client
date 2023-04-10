@@ -27,18 +27,20 @@ export const addMoodTrackForTodayQuery = async ({
   );
 };
 
-export const getMoodTrackForWeekQuery = async ({
+export const getMoodTrackEntriesQuery = async ({
   poolCountry,
   client_id,
-  startDate,
+  limit,
+  offset,
 }) => {
   return await getDBPool("clinicalDb", poolCountry).query(
     `
-      SELECT mood, comment, time
+      SELECT mood, comment, time, mood_tracker_id
       FROM mood_tracker
       WHERE client_detail_id = $1
-        AND time between $2::date - interval '7 day' AND $2::date + interval '7 day';
+      ORDER BY id DESC
+      OFFSET $2 LIMIT $3;
     `,
-    [client_id, startDate]
+    [client_id, offset, limit]
   );
 };

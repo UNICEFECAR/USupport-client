@@ -15,5 +15,6 @@ export const addMoodTrackForTodaySchema = yup.object().shape({
 export const getMoodTrackForWeekSchema = yup.object().shape({
   country: yup.string().required(),
   client_id: yup.string().uuid().required(),
-  startDate: yup.string().required(),
+  limit: yup.number().required(),
+  pageNum: yup.number().required(),
 });

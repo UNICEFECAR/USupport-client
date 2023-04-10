@@ -10,7 +10,7 @@ import {
 import {
   getMoodTrackForToday,
   addMoodTrackForToday,
-  getMoodTrackForWeek,
+  getMoodTrackEntries,
 } from "#controllers/moodTracker";
 
 const router = express.Router();
@@ -32,20 +32,22 @@ router.route("/today").get(populateClient, async (req, res, next) => {
     .catch(next);
 });
 
-router.route("/week").get(populateClient, async (req, res, next) => {
+router.route("/entries").get(populateClient, async (req, res, next) => {
   /**
-   * #route   GET /client/v1/mood-tracker/week
+   * #route   GET /client/v1/mood-tracker/entires
    * #desc    Get client mood for today
    */
   const country = req.header("x-country-alpha-2");
   const client_id = req.client.client_detail_id;
-  const startDate = req.query.startDate;
+
+  const limit = Number(req.query.limit);
+  const pageNum = Number(req.query.pageNum);
 
   return await getMoodTrackForWeekSchema
     .noUnknown(true)
     .strict(true)
-    .validate({ country, client_id, startDate })
-    .then(getMoodTrackForWeek)
+    .validate({ limit, pageNum, country, client_id })
+    .then(getMoodTrackEntries)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
