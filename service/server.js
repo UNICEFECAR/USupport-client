@@ -21,6 +21,7 @@ app.use(helmet());
 app.use("/client/v1/client", v1.ClientRouter);
 app.use("/client/v1/consultation", v1.ConsultationRouter);
 app.use("/client/v1/mood-tracker", v1.MoodTrackerRouter);
+app.use("/client/v1/my-qa", v1.MyQARouter);
 
 /*------------- Error middleware -------------*/
 
