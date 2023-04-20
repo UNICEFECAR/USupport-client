@@ -39,6 +39,22 @@ export const getClientByUserID = async (poolCountry, user_id) =>
     [user_id]
   );
 
+export const getCliendDetailIdByUserIdQuery = async ({
+  poolCountry,
+  user_id,
+}) => {
+  return await getDBPool("piiDb", poolCountry).query(
+    `
+      SELECT client_detail_id 
+      FROM "user"
+      WHERE user_id = $1
+      ORDER BY created_at DESC
+      LIMIT 1
+      `,
+    [user_id]
+  );
+};
+
 export const checkIfEmailIsUsedQuery = async ({ country, email }) =>
   await getDBPool("piiDb", country).query(
     `
