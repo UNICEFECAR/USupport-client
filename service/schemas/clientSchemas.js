@@ -25,20 +25,48 @@ export const updateClientDataSchema = (language) =>
           .email()
           .required(t("email_required_error", language)),
       }),
-      currentEmail: yup.string().when("userAccessToken", {
-        is: undefined,
-        then: yup
-          .string()
-          .email()
-          .required(t("email_required_error", language)),
-      }),
+      currentEmail: yup
+        .string()
+        .when("userAccessToken", {
+          is: undefined,
+          then: yup
+            .string()
+            .email()
+            .required(t("email_required_error", language)),
+        })
+        .nullable(),
       userAccessToken: yup.string().when("email", {
         is: undefined,
         then: yup.string().required(t("access_token_required_error", language)),
       }),
-      sex: sexTypeSchema.notRequired(),
-      yearOfBirth: yup.number().positive().notRequired(),
-      urbanRural: urbanRuralTypeSchema.notRequired(),
+      sex: sexTypeSchema
+        .when("userAccessToken", {
+          is: undefined,
+          then: sexTypeSchema.required(),
+        })
+        .notRequired()
+        .nullable()
+        .transform((value) => (!!value ? value : null)),
+      yearOfBirth: yup
+        .number()
+        .when("userAccessToken", {
+          is: undefined,
+          then: yup.number().positive().required(),
+        })
+        .min(1, "Min value is 1")
+        .transform((value, originalValue) =>
+          originalValue.trim() === "" ? null : value
+        )
+        .nullable()
+        .notRequired(),
+      urbanRural: urbanRuralTypeSchema
+        .when("userAccessToken", {
+          is: undefined,
+          then: urbanRuralTypeSchema.required(),
+        })
+        .notRequired()
+        .nullable()
+        .transform((value) => (!!value ? value : null)),
     },
     ["userAccessToken", "email"]
   );
