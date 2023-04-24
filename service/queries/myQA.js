@@ -35,13 +35,29 @@ export const getClientQuestionsQuery = async ({
 }) => {
   return await getDBPool("clinicalDb", poolCountry).query(
     `
-            SELECT question.question, answer.title as answer_title, answer.text as answer_text, answer.provider_detail_id, answer.likes, answer.dislikes,  array_agg(tags.tag) as tags, answer.answer_id as answer_id
+            SELECT 
+                question.question, 
+                question.created_at as question_created_at, 
+                question.question_id as question_id,
+                answer.answer_id as answer_id,
+                answer.created_at as answer_created_at, 
+                answer.title AS answer_title, 
+                answer.text AS answer_text, 
+                answer.provider_detail_id, 
+                answer.likes, 
+                answer.dislikes, 
+                array_agg(tags.tag) AS tags
             FROM question
                 LEFT JOIN answer on question.question_id = answer.question_id
                 LEFT JOIN answer_tags_links on answer_tags_links.answer_id = answer.answer_id
                 LEFT JOIN tags on answer_tags_links.tag_id = tags.tag_id
             WHERE question.client_detail_id = $1 AND question.status = 'active'
-            GROUP BY question.question, answer.answer_id, question.created_at
+            GROUP BY 
+                question.question, 
+                question.question_id,
+                answer.answer_id, 
+                question.created_at, 
+                question.client_detail_id
             ORDER BY question.created_at DESC
         `,
     [clientDetailId]
