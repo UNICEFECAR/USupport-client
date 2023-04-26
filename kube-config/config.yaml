@@ -6,3 +6,4 @@ data:
   NODE_ENV: production
   PORT: "3001"
   REDIS_CACHE: redis://redis-service:6379
+  USER_URL: http://user-service:3010
