@@ -1,4 +1,4 @@
-import { getCliendDetailIdByUserIdQuery } from "#queries/clients";
+import { getCliendDetailByUserIdQuery } from "#queries/clients";
 import fetch from "node-fetch";
 
 const USER_LOCAL_HOST = "http://localhost:3010";
@@ -23,7 +23,7 @@ export const getClientDetailIdByUserId = async (
     .catch(console.log);
 
   if (result.user_id) {
-    return await getCliendDetailIdByUserIdQuery({
+    return await getCliendDetailByUserIdQuery({
       poolCountry: country,
       user_id: result.user_id,
     })

@@ -39,7 +39,7 @@ export const getClientByUserID = async (poolCountry, user_id) =>
     [user_id]
   );
 
-export const getCliendDetailIdByUserIdQuery = async ({
+export const getCliendDetailByUserIdQuery = async ({
   poolCountry,
   user_id,
 }) => {
