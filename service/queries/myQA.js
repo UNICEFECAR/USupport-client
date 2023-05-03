@@ -69,6 +69,7 @@ export const getAllQuestionsQuery = async ({ poolCountry, orderBy }) => {
     return await getDBPool("clinicalDb", poolCountry).query(
       `
         SELECT 
+            question.client_detail_id,
             question.question, 
             question.created_at as question_created_at, 
             question.question_id as question_id,
@@ -104,6 +105,7 @@ export const getAllQuestionsQuery = async ({ poolCountry, orderBy }) => {
   return await getDBPool("clinicalDb", poolCountry).query(
     `
         SELECT 
+            question.client_detail_id,
             question.question, 
             question.created_at as question_created_at, 
             question.question_id as question_id,

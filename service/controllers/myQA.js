@@ -152,6 +152,8 @@ export const getAllQuestions = async ({
                 questions[i].likes?.includes(clientDetailId);
               questions[i].isDisliked =
                 questions[i].dislikes?.includes(clientDetailId);
+              questions[i].isAskedByCurrentClient =
+                questions[i].client_detail_id === clientDetailId;
             }
 
             questions[i].providerData = currentQuestionProviderData;
