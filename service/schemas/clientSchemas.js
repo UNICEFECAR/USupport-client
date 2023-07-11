@@ -46,7 +46,7 @@ export const updateClientDataSchema = (language) =>
         })
         .notRequired()
         .nullable()
-        .transform((value) => (!!value ? value : null)),
+        .transform((value) => value || null),
       yearOfBirth: yup
         .number()
         .when("userAccessToken", {
@@ -66,7 +66,7 @@ export const updateClientDataSchema = (language) =>
         })
         .notRequired()
         .nullable()
-        .transform((value) => (!!value ? value : null)),
+        .transform((value) => value || null),
     },
     ["userAccessToken", "email"]
   );
