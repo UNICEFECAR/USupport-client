@@ -13,6 +13,7 @@ import {
   addClientRatingSchema,
   addClientPushNotificationTokenSchema,
   checkIsCouponAvailableSchema,
+  deleteChatHistorySchema,
 } from "#schemas/clientSchemas";
 
 import {
@@ -26,6 +27,7 @@ import {
   addClientRating,
   addClientPushNotificationToken,
   checkIsCouponAvailable,
+  deleteChatHistory,
 } from "#controllers/clients";
 
 const router = express.Router();
@@ -276,6 +278,27 @@ router.get("/check-coupon", populateUser, async (req, res, next) => {
     .strict()
     .validate({ country, language, client_detail_id, couponCode })
     .then(checkIsCouponAvailable)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.put("/chat-history", populateUser, async (req, res, next) => {
+  /**
+   * #route   DELETE /client/v1/client/chat-history
+   * #desc    Delete chat history
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+
+  const { time } = req.body;
+
+  const client_detail_id = req.user.client_detail_id;
+
+  return await deleteChatHistorySchema
+    .noUnknown(true)
+    .strict()
+    .validate({ client_detail_id, language, country, time })
+    .then(deleteChatHistory)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });

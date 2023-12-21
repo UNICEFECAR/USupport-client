@@ -285,3 +285,23 @@ export const getTotalCampaignConsultationsQuery = async ({
     [campaign_id]
   );
 };
+
+export const deleteChatHistoryQuery = async ({
+  poolCountry,
+  client_detail_id,
+  time,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+    UPDATE chat
+    SET messages = ARRAY[JSON_BUILD_OBJECT(
+      'type', 'system',
+      'content', 'chat_history_deleted_by_client',
+      'time', $2::text,
+      'senderId', $1
+    )]
+    WHERE client_detail_id = $1;
+  `,
+    [client_detail_id, time]
+  );
+};

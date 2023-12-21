@@ -16,6 +16,7 @@ import {
   checkIsCouponAvailableQuery,
   getClientCampaignConsultationsQuery,
   getTotalCampaignConsultationsQuery,
+  deleteChatHistoryQuery,
 } from "#queries/clients";
 
 import {
@@ -379,4 +380,22 @@ export const checkIsCouponAvailable = async ({
       success: true,
     };
   }
+};
+
+export const deleteChatHistory = async ({
+  country,
+  client_detail_id,
+  time,
+}) => {
+  return await deleteChatHistoryQuery({
+    poolCountry: country,
+    client_detail_id,
+    time,
+  })
+    .then(() => {
+      return { success: true };
+    })
+    .catch((err) => {
+      throw err;
+    });
 };
