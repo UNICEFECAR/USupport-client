@@ -305,3 +305,17 @@ export const deleteChatHistoryQuery = async ({
     [client_detail_id, time]
   );
 };
+
+export const deleteMoodTrackDataQuery = async ({
+  poolCountry,
+  client_detail_id,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+    UPDATE mood_tracker
+    SET comment = 'DELETED', mood = 'DELETED'
+    WHERE client_detail_id = $1;
+  `,
+    [client_detail_id]
+  );
+};
