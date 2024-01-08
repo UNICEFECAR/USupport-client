@@ -79,6 +79,7 @@ export const deleteClientDataSchema = yup.object().shape({
   image: yup.string().required(),
   userPassword: yup.string().required(),
   password: yup.string().required(),
+  time: yup.string().required(),
 });
 
 export const updateClientImageSchema = yup.object().shape({

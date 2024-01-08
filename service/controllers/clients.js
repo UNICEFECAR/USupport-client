@@ -17,6 +17,7 @@ import {
   getClientCampaignConsultationsQuery,
   getTotalCampaignConsultationsQuery,
   deleteChatHistoryQuery,
+  deleteMoodTrackDataQuery,
 } from "#queries/clients";
 
 import {
@@ -118,6 +119,7 @@ export const deleteClientData = async ({
   image,
   password,
   userPassword,
+  time,
 }) => {
   const validatePassword = await bcrypt.compare(password, userPassword);
 
@@ -134,6 +136,15 @@ export const deleteClientData = async ({
       if (res.rowCount === 0) {
         throw clientNotFound(language);
       } else {
+        await deleteChatHistoryQuery({
+          poolCountry: country,
+          client_detail_id: client_id,
+          time,
+        });
+        await deleteMoodTrackDataQuery({
+          poolCountry: country,
+          client_detail_id: client_id,
+        });
         if (image !== "default") {
           try {
             const s3 = new AWS.S3({
