@@ -27,6 +27,7 @@ import {
   couponNotFound,
   clientLimitReached,
   couponsLimitReached,
+  errorOccured,
 } from "#utils/errors";
 import { deleteCacheItem } from "#utils/cache";
 
@@ -76,7 +77,7 @@ export const updateClientData = async ({
     })
       .then((res) => {
         if (res.rowCount > 0) {
-          throw emailUsed(language);
+          throw errorOccured(language);
         }
       })
       .catch((err) => {

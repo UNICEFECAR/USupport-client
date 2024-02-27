@@ -63,3 +63,11 @@ export const consultationNotFound = (language) => {
   error.status = 404;
   return error;
 };
+
+export const errorOccured = (language) => {
+  const error = new Error();
+  error.message = t("error_occured", language);
+  error.name = "ERROR OCCURED";
+  error.status = 404;
+  return error;
+};

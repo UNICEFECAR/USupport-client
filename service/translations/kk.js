@@ -12,4 +12,5 @@ export default {
   coupons_limit_reached_error:
     "Осы науқанда қамтылған кеңестердің максималды санына жетті",
   consultation_not_found_error: "Консультация табылмады",
+  en_error_occured: "Қателік пайда болды",
 };
