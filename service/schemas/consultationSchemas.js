@@ -35,7 +35,7 @@ export const securityCheckAnswersSchema = yup.object().shape({
   addressedNeeds: yup.number().required(),
   improveWellbeing: yup.number().required(),
   feelingsNow: yup.number().required(),
-  additionalComment: yup.string().notRequired(),
+  additionalComment: yup.string().notRequired().nullable(),
 });
 
 export const unblockSlotSchema = getAllConsultationsSchema.shape({
