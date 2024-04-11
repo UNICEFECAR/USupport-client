@@ -23,7 +23,7 @@ import {
 import {
   clientNotFound,
   incorrectPassword,
-  emailUsed,
+  // emailUsed,
   couponNotFound,
   clientLimitReached,
   couponsLimitReached,

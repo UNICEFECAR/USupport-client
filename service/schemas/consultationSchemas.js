@@ -13,24 +13,29 @@ export const getSecurityCheckAnswersByConsultationIdSchema = yup
     consultation_id: yup.string().uuid().required(),
   });
 
-export const addSecurityCheckAnswersSchema = yup.object().shape({
+export const securityCheckAnswersSchema = yup.object().shape({
   country: yup.string().required(),
   consultationId: yup.string().uuid().required(),
+  providerAttend: yup.boolean().required(),
   contactsDisclosure: yup.boolean().required(),
   suggestOutsideMeeting: yup.boolean().required(),
   identityCoercion: yup.boolean().required(),
   unsafeFeeling: yup.boolean().required(),
   moreDetails: yup.string().notRequired(),
-});
-
-export const updateSecurityCheckAnswersSchema = yup.object().shape({
-  country: yup.string().required(),
-  consultationId: yup.string().uuid().required(),
-  contactsDisclosure: yup.boolean().required(),
-  suggestOutsideMeeting: yup.boolean().required(),
-  identityCoercion: yup.boolean().required(),
-  unsafeFeeling: yup.boolean().required(),
-  moreDetails: yup.string().notRequired(),
+  feeling: yup
+    .string()
+    .required()
+    .oneOf([
+      "very_satisfied",
+      "satisfied",
+      "neutral",
+      "dissatisfied",
+      "very_dissatisfied",
+    ]),
+  addressedNeeds: yup.number().required(),
+  improveWellbeing: yup.number().required(),
+  feelingsNow: yup.number().required(),
+  additionalComment: yup.string().notRequired().nullable(),
 });
 
 export const unblockSlotSchema = getAllConsultationsSchema.shape({

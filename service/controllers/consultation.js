@@ -142,20 +142,32 @@ export const getSecurityCheckAnswersByConsultationId = async ({
 export const addSecurityCheckAnswers = async ({
   country,
   consultationId,
+  providerAttend,
   contactsDisclosure,
   suggestOutsideMeeting,
   identityCoercion,
   unsafeFeeling,
   moreDetails,
+  feeling,
+  addressedNeeds,
+  improveWellbeing,
+  feelingsNow,
+  additionalComment,
 }) => {
   return await addSecurityCheckAnswersQuery({
     poolCountry: country,
     consultationId,
+    providerAttend,
     contactsDisclosure,
     suggestOutsideMeeting,
     identityCoercion,
     unsafeFeeling,
     moreDetails,
+    feeling,
+    addressedNeeds,
+    improveWellbeing,
+    feelingsNow,
+    additionalComment,
   })
     .then((res) => {
       if (res.rowCount === 0) {
@@ -172,20 +184,32 @@ export const addSecurityCheckAnswers = async ({
 export const updateSecurityCheckAnswers = async ({
   country,
   consultationId,
+  providerAttend,
   contactsDisclosure,
   suggestOutsideMeeting,
   identityCoercion,
   unsafeFeeling,
   moreDetails,
+  feeling,
+  addressedNeeds,
+  improveWellbeing,
+  feelingsNow,
+  additionalComment,
 }) => {
   return await updateSecurityCheckAnswersQuery({
     poolCountry: country,
     consultationId,
+    providerAttend,
     contactsDisclosure,
     suggestOutsideMeeting,
     identityCoercion,
     unsafeFeeling,
     moreDetails,
+    feeling,
+    addressedNeeds,
+    improveWellbeing,
+    feelingsNow,
+    additionalComment,
   })
     .then((res) => {
       if (res.rowCount === 0) {

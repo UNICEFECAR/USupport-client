@@ -31,18 +31,24 @@ export const getSecurityCheckAnswersByConsultationIdQuery = async ({
 export const addSecurityCheckAnswersQuery = async ({
   poolCountry,
   consultationId,
+  providerAttend,
   contactsDisclosure,
   suggestOutsideMeeting,
   identityCoercion,
   unsafeFeeling,
   moreDetails,
+  feeling,
+  addressedNeeds,
+  improveWellbeing,
+  feelingsNow,
+  additionalComment,
 }) =>
   await getDBPool("clinicalDb", poolCountry).query(
     `
     
       INSERT INTO consultation_security_check
-      (consultation_id, contacts_disclosure, suggest_outside_meeting, identity_coercion, unsafe_feeling, more_details)
-      VALUES ($1, $2, $3, $4, $5, $6)
+      (consultation_id, contacts_disclosure, suggest_outside_meeting, identity_coercion, unsafe_feeling, more_details, provider_attend, feeling, addressed_needs, improve_wellbeing, feelings_now, additional_comment)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *
 
     `,
@@ -53,23 +59,35 @@ export const addSecurityCheckAnswersQuery = async ({
       identityCoercion,
       unsafeFeeling,
       moreDetails,
+      providerAttend,
+      feeling,
+      addressedNeeds,
+      improveWellbeing,
+      feelingsNow,
+      additionalComment,
     ]
   );
 
 export const updateSecurityCheckAnswersQuery = async ({
   poolCountry,
   consultationId,
+  providerAttend,
   contactsDisclosure,
   suggestOutsideMeeting,
   identityCoercion,
   unsafeFeeling,
   moreDetails,
+  feeling,
+  addressedNeeds,
+  improveWellbeing,
+  feelingsNow,
+  additionalComment,
 }) =>
   await getDBPool("clinicalDb", poolCountry).query(
     `
     
       UPDATE consultation_security_check
-      SET contacts_disclosure = $2, suggest_outside_meeting = $3, identity_coercion = $4, unsafe_feeling = $5, more_details = $6
+      SET contacts_disclosure = $2, suggest_outside_meeting = $3, identity_coercion = $4, unsafe_feeling = $5, more_details = $6, provider_attend = $7, feeling = $8, addressed_needs = $9, improve_wellbeing = $10, feelings_now = $11, additional_comment = $12
       WHERE consultation_id = $1
       RETURNING *
 
@@ -81,6 +99,12 @@ export const updateSecurityCheckAnswersQuery = async ({
       identityCoercion,
       unsafeFeeling,
       moreDetails,
+      providerAttend,
+      feeling,
+      addressedNeeds,
+      improveWellbeing,
+      feelingsNow,
+      additionalComment,
     ]
   );
 
