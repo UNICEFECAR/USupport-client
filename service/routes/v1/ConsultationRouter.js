@@ -5,8 +5,7 @@ import { populateUser } from "#middlewares/populateMiddleware";
 import {
   getAllConsultationsSchema,
   getSecurityCheckAnswersByConsultationIdSchema,
-  addSecurityCheckAnswersSchema,
-  updateSecurityCheckAnswersSchema,
+  securityCheckAnswersSchema,
   unblockSlotSchema,
 } from "#schemas/consultationSchemas";
 
@@ -66,7 +65,7 @@ router.route("/security-check").post(async (req, res, next) => {
 
   const payload = req.body;
 
-  return await addSecurityCheckAnswersSchema
+  return await securityCheckAnswersSchema
     .noUnknown(true)
     .strict(true)
     .validate({ country, ...payload })
@@ -84,7 +83,7 @@ router.route("/security-check").put(async (req, res, next) => {
 
   const payload = req.body;
 
-  return await updateSecurityCheckAnswersSchema
+  return await securityCheckAnswersSchema
     .noUnknown(true)
     .strict(true)
     .validate({ country, ...payload })
