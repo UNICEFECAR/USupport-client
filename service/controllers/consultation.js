@@ -105,8 +105,10 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
       const sponsorData = sponsorsData.find(
         (sponsor) => sponsor.campaign_id === consultation.campaign_id
       );
-      res.sponsor_name = sponsorData.sponsor_name;
-      res.sponsor_image = sponsorData.sponsor_image;
+      if (sponsorData) {
+        res.sponsor_name = sponsorData.sponsor_name;
+        res.sponsor_image = sponsorData.sponsor_image;
+      }
     }
 
     response.push(res);
