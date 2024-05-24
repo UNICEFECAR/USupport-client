@@ -12,5 +12,5 @@ export default {
   coupons_limit_reached_error:
     "Досягнуто максимальної кількості консультацій, охоплених цією кампанією",
   consultation_not_found_error: "Консультацію не знайдено",
-  error_occured: "An error occurred UK",
+  error_occured: "Виникла помилка",
 };

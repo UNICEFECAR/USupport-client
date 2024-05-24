@@ -12,5 +12,5 @@ export default {
   coupons_limit_reached_error:
     "Osiągnięto maksymalną liczbę konsultacji objętych tą kampanią",
   consultation_not_found_error: "Nie znaleziono konsultacji",
-  error_occured: "An error occurred PL",
+  error_occured: "Wystąpił błąd",
 };
