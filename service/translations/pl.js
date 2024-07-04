@@ -1,11 +1,11 @@
 export default {
-  email_required_error: "Należy podać ważny adres e-mail",
+  email_required_error: "Należy podać ważny adres email",
   access_token_required_error: "Należy podać prawidłowy token dostępu",
   nickname_required_error: "Musisz podać nick",
   client_not_found_error: "Nie znaleziono klienta",
   provider_not_found_error: "Nie znaleziono konsultanta",
   incorrect_password_error: "Podane hasło jest nieprawidłowe",
-  email_already_used_error: "Ten adres e-mail jest już wykorzystany",
+  email_already_used_error: "Ten adres email jest już wykorzystany",
   coupon_not_found_error: "Nie znaleziono kuponu",
   client_limit_reached_error:
     "Osiągnąłeś maksymalną liczbę konsultacji objętych tą kampanią",
