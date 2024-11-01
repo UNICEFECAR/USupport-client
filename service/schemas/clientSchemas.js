@@ -48,12 +48,27 @@ export const updateClientDataSchema = (language) =>
         .nullable()
         .transform((value) => value || null),
       yearOfBirth: yup
-        .number()
+        .mixed()
         .when("userAccessToken", {
           is: undefined,
-          then: yup.number().positive().required(),
+          then: yup
+            .mixed()
+            .test(
+              "is-valid-year-or-parent",
+              "Must be a positive number or 'parent'",
+              (value) => {
+                // Allow "parent" string or a positive number
+                return (
+                  value === "parent" || (typeof value === "number" && value > 0)
+                );
+              }
+            )
+            .required(),
         })
-        .min(1, "Min value is 1")
+        .test("min-value", "Min value is 1", (value) => {
+          // Only enforce minimum for numbers, not "parent"
+          return value === null || value === "parent" || value >= 1;
+        })
         .transform((value, originalValue) =>
           originalValue.trim() === "" ? null : value
         )
