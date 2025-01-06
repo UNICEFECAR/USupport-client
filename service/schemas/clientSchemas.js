@@ -59,7 +59,8 @@ export const updateClientDataSchema = (language) =>
               (value) => {
                 // Allow "parent" string or a positive number
                 return (
-                  value === "parent" || (typeof value === "number" && value > 0)
+                  value === "parent" ||
+                  (!isNaN(Number(value)) && Number(value) > 0)
                 );
               }
             )
