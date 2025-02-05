@@ -64,7 +64,11 @@ export const getClientQuestionsQuery = async ({
   );
 };
 
-export const getAllQuestionsQuery = async ({ poolCountry, orderBy }) => {
+export const getAllQuestionsQuery = async ({
+  poolCountry,
+  orderBy,
+  languageId,
+}) => {
   if (orderBy !== "most_popular")
     return await getDBPool("clinicalDb", poolCountry).query(
       `
@@ -86,7 +90,9 @@ export const getAllQuestionsQuery = async ({ poolCountry, orderBy }) => {
             JOIN answer ON question.question_id = answer.question_id
             LEFT JOIN answer_tags_links ON answer_tags_links.answer_id = answer.answer_id
             LEFT JOIN tags ON answer_tags_links.tag_id = tags.tag_id
-        WHERE question.status = 'active'
+        WHERE question.status = 'active' AND (
+        $2::uuid IS NULL OR answer.language_id = $2::uuid
+        )
         GROUP BY 
             question.question, 
             question.question_id,
@@ -100,7 +106,7 @@ export const getAllQuestionsQuery = async ({ poolCountry, orderBy }) => {
         END
         DESC
         `,
-      [orderBy]
+      [orderBy, languageId === "all" ? null : languageId]
     );
   return await getDBPool("clinicalDb", poolCountry).query(
     `

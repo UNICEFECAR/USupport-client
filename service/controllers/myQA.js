@@ -103,10 +103,12 @@ export const getAllQuestions = async ({
   language,
   orderBy,
   authHeader,
+  languageId,
 }) => {
   const questions = await getAllQuestionsQuery({
     poolCountry: country,
     orderBy,
+    languageId,
   })
     .then(async (res) => {
       if (res.rowCount === 0) {

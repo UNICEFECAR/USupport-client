@@ -9,6 +9,7 @@ export const getAllQuestionsSchema = countrySchema.shape({
   country: yup.string().required(),
   orderBy: yup.string().oneOf(["all", "newest", "most_popular"]).required(),
   authHeader: yup.string().nullable(),
+  languageId: yup.string().required(),
 });
 
 export const getClientQuestionsSchema = countrySchema.shape({

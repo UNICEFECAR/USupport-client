@@ -64,7 +64,7 @@ router.post("/create-question", populateClient, async (req, res, next) => {
 router.get("/questions", async (req, res, next) => {
   const country = req.header("x-country-alpha-2");
   const language = req.header("x-language-alpha-2");
-  const { orderBy } = req.query;
+  const { orderBy, languageId } = req.query;
 
   return await getAllQuestionsSchema
     .noUnknown(true)
@@ -74,6 +74,7 @@ router.get("/questions", async (req, res, next) => {
       language,
       orderBy,
       authHeader: req.headers.authorization || null,
+      languageId,
     })
     .then(getAllQuestions)
     .then((result) => res.status(200).send(result))
