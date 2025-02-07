@@ -49,10 +49,15 @@ export const createQuestion = async ({
     });
 };
 
-export const getClientQuestions = async ({ country, client_detail_id }) => {
+export const getClientQuestions = async ({
+  country,
+  client_detail_id,
+  languageId,
+}) => {
   const questions = await getClientQuestionsQuery({
     poolCountry: country,
     clientDetailId: client_detail_id,
+    languageId,
   })
     .then(async (res) => {
       if (res.rowCount === 0) {
@@ -103,10 +108,12 @@ export const getAllQuestions = async ({
   language,
   orderBy,
   authHeader,
+  languageId,
 }) => {
   const questions = await getAllQuestionsQuery({
     poolCountry: country,
     orderBy,
+    languageId,
   })
     .then(async (res) => {
       if (res.rowCount === 0) {

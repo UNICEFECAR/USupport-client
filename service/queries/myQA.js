@@ -32,6 +32,7 @@ export const createQuestionQuery = async ({
 export const getClientQuestionsQuery = async ({
   poolCountry,
   clientDetailId,
+  languageId,
 }) => {
   return await getDBPool("clinicalDb", poolCountry).query(
     `
@@ -51,20 +52,24 @@ export const getClientQuestionsQuery = async ({
                 LEFT JOIN answer on question.question_id = answer.question_id
                 LEFT JOIN answer_tags_links on answer_tags_links.answer_id = answer.answer_id
                 LEFT JOIN tags on answer_tags_links.tag_id = tags.tag_id
-            WHERE question.client_detail_id = $1 AND question.status = 'active'
+            WHERE question.client_detail_id = $1 AND question.status = 'active' AND ($2::uuid IS NULL OR answer.language_id = $2::uuid)
             GROUP BY 
                 question.question, 
                 question.question_id,
                 answer.answer_id, 
                 question.created_at, 
                 question.client_detail_id
-            ORDER BY question.created_at DESC
+            ORDER BY answer.created_at DESC
         `,
-    [clientDetailId]
+    [clientDetailId, languageId === "all" ? null : languageId]
   );
 };
 
-export const getAllQuestionsQuery = async ({ poolCountry, orderBy }) => {
+export const getAllQuestionsQuery = async ({
+  poolCountry,
+  orderBy,
+  languageId,
+}) => {
   if (orderBy !== "most_popular")
     return await getDBPool("clinicalDb", poolCountry).query(
       `
@@ -86,7 +91,9 @@ export const getAllQuestionsQuery = async ({ poolCountry, orderBy }) => {
             JOIN answer ON question.question_id = answer.question_id
             LEFT JOIN answer_tags_links ON answer_tags_links.answer_id = answer.answer_id
             LEFT JOIN tags ON answer_tags_links.tag_id = tags.tag_id
-        WHERE question.status = 'active'
+        WHERE question.status = 'active' AND (
+        $2::uuid IS NULL OR answer.language_id = $2::uuid
+        )
         GROUP BY 
             question.question, 
             question.question_id,
@@ -100,7 +107,7 @@ export const getAllQuestionsQuery = async ({ poolCountry, orderBy }) => {
         END
         DESC
         `,
-      [orderBy]
+      [orderBy, languageId === "all" ? null : languageId]
     );
   return await getDBPool("clinicalDb", poolCountry).query(
     `
