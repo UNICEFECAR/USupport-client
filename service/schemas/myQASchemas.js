@@ -14,6 +14,7 @@ export const getAllQuestionsSchema = countrySchema.shape({
 
 export const getClientQuestionsSchema = countrySchema.shape({
   client_detail_id: yup.string().uuid().required(),
+  languageId: yup.string().required(),
 });
 
 export const createQuestionSchema = getClientQuestionsSchema.shape({
