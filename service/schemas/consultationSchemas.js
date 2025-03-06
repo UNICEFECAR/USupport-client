@@ -24,14 +24,16 @@ export const securityCheckAnswersSchema = yup.object().shape({
   moreDetails: yup.string().notRequired(),
   feeling: yup
     .string()
-    .required()
     .oneOf([
       "very_satisfied",
       "satisfied",
       "neutral",
       "dissatisfied",
       "very_dissatisfied",
-    ]),
+      null,
+    ])
+    .notRequired()
+    .nullable(),
   addressedNeeds: yup.number().required(),
   improveWellbeing: yup.number().required(),
   feelingsNow: yup.number().required(),
