@@ -22,7 +22,7 @@ export const updateClientDataSchema = (language) =>
         is: undefined,
         then: yup
           .string()
-          .email()
+          .email({ tlds: { allow: false } })
           .required(t("email_required_error", language)),
       }),
       currentEmail: yup
@@ -31,7 +31,7 @@ export const updateClientDataSchema = (language) =>
           is: undefined,
           then: yup
             .string()
-            .email()
+            .email({ tlds: { allow: false } })
             .required(t("email_required_error", language)),
         })
         .nullable(),
