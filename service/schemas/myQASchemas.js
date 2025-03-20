@@ -17,12 +17,14 @@ export const getClientQuestionsSchema = countrySchema.shape({
   languageId: yup.string().required(),
 });
 
-export const createQuestionSchema = getClientQuestionsSchema.shape({
+export const createQuestionSchema = countrySchema.shape({
+  client_detail_id: yup.string().uuid().required(),
   language: yup.string().required(),
   question: yup.string().required(),
 });
 
-export const addAnswerVoteSchema = getClientQuestionsSchema.shape({
+export const addAnswerVoteSchema = countrySchema.shape({
+  client_detail_id: yup.string().uuid().required(),
   language: yup.string().required(),
   answerId: yup.string().uuid().required(),
   vote: yup
