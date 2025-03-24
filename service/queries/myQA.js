@@ -52,7 +52,10 @@ export const getClientQuestionsQuery = async ({
                 LEFT JOIN answer on question.question_id = answer.question_id
                 LEFT JOIN answer_tags_links on answer_tags_links.answer_id = answer.answer_id
                 LEFT JOIN tags on answer_tags_links.tag_id = tags.tag_id
-            WHERE question.client_detail_id = $1 AND question.status = 'active' AND ($2::uuid IS NULL OR answer.language_id = $2::uuid)
+            WHERE question.client_detail_id = $1 AND question.status = 'active' AND (
+            answer IS NULL OR
+            ($2::uuid IS NULL OR answer.language_id = $2::uuid)
+            )
             GROUP BY 
                 question.question, 
                 question.question_id,
@@ -92,7 +95,8 @@ export const getAllQuestionsQuery = async ({
             LEFT JOIN answer_tags_links ON answer_tags_links.answer_id = answer.answer_id
             LEFT JOIN tags ON answer_tags_links.tag_id = tags.tag_id
         WHERE question.status = 'active' AND (
-        $2::uuid IS NULL OR answer.language_id = $2::uuid
+        answer IS NULL OR
+        ($2::uuid IS NULL OR answer.language_id = $2::uuid)
         )
         GROUP BY 
             question.question, 
@@ -129,7 +133,10 @@ export const getAllQuestionsQuery = async ({
             JOIN answer ON question.question_id = answer.question_id
             LEFT JOIN answer_tags_links ON answer_tags_links.answer_id = answer.answer_id
             LEFT JOIN tags ON answer_tags_links.tag_id = tags.tag_id
-        WHERE question.status = 'active'
+        WHERE question.status = 'active' AND (
+        answer IS NULL OR
+        ($1::uuid IS NULL OR answer.language_id = $1::uuid)
+        )
         GROUP BY 
             question.question, 
             question.question_id,
@@ -137,7 +144,8 @@ export const getAllQuestionsQuery = async ({
             question.created_at, 
             question.client_detail_id
         ORDER BY  cardinality(answer.likes) - cardinality(answer.dislikes) DESC
-        `
+        `,
+    [languageId === "all" ? null : languageId]
   );
 };
 
