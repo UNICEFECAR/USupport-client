@@ -109,6 +109,7 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
       if (sponsorData) {
         res.sponsor_name = sponsorData.sponsor_name;
         res.sponsor_image = sponsorData.sponsor_image;
+        res.coupon_code = sponsorData.coupon_code;
       }
     }
 
