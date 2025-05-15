@@ -9,7 +9,7 @@ import {
 import { getProviderByIdQuery } from "#queries/providers";
 import { getSponsorNameAndImageByCampaignIdQuery } from "#queries/sponsors";
 
-import { providerNotFound, consultationNotFound } from "#utils/errors";
+import { consultationNotFound } from "#utils/errors";
 
 export const getAllConsultations = async ({ country, language, client_id }) => {
   const consultations = await getAllConsultationsQuery({
@@ -44,7 +44,11 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
     })
       .then((res) => {
         if (res.rowCount === 0) {
-          throw providerNotFound(language);
+          return {
+            name: "DELETED",
+            surname: "DELETED",
+            image: "default",
+          };
         } else {
           return res.rows[0];
         }
