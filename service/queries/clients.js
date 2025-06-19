@@ -319,3 +319,39 @@ export const deleteMoodTrackDataQuery = async ({
     [client_detail_id]
   );
 };
+
+export const addClientCategoryInteractionQuery = async ({
+  poolCountry,
+  clientDetailId,
+  categoryId,
+  mediaType,
+  mediaId,
+  tagIds,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+    INSERT INTO client_category_interaction (client_detail_id, category_id, media_type, media_id, tag_ids, count, created_at, updated_at)
+    VALUES ($1, $2, $3, $4, $5, 1, NOW(), NOW())
+    ON CONFLICT (client_detail_id, category_id, media_type, media_id)
+    DO UPDATE SET 
+      count = client_category_interaction.count + 1,
+      updated_at = NOW()
+    RETURNING *;
+    `,
+    [clientDetailId, categoryId, mediaType, mediaId, tagIds]
+  );
+};
+
+export const getCategoryInteractionsQuery = async ({
+  poolCountry,
+  clientDetailId,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+    SELECT category_id, media_type, media_id, count, tag_ids
+    FROM client_category_interaction
+    WHERE client_detail_id = $1
+    `,
+    [clientDetailId]
+  );
+};
