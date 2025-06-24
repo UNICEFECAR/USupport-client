@@ -161,3 +161,19 @@ export const deleteChatHistorySchema = yup.object().shape({
   language: yup.string().required(),
   time: yup.string().required(),
 });
+
+export const addClientCategoryInteractionSchema = yup.object().shape({
+  clientDetailId: yup.string().uuid().required(),
+  categoryId: yup.number().required(),
+  articleId: yup.number().notRequired(),
+  videoId: yup.number().notRequired(),
+  podcastId: yup.number().notRequired(),
+  tagIds: yup.array().of(yup.number()).required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+});
+
+export const getCategoryInteractionsSchema = yup.object().shape({
+  clientDetailId: yup.string().uuid().required(),
+  country: yup.string().required(),
+});

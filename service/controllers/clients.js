@@ -18,6 +18,8 @@ import {
   getTotalCampaignConsultationsQuery,
   deleteChatHistoryQuery,
   deleteMoodTrackDataQuery,
+  addClientCategoryInteractionQuery,
+  getCategoryInteractionsQuery,
 } from "#queries/clients";
 
 import {
@@ -369,7 +371,7 @@ export const checkIsCouponAvailable = async ({
       return res.rows[0].count;
     }
   });
-  console.log(clientCampaignConsultations, "clientConsultations");
+
   const isClientLimitReached =
     clientCampaignConsultations >= campaignData.max_coupons_per_client;
   const isCouponsLimitReached =
@@ -406,6 +408,58 @@ export const deleteChatHistory = async ({
   })
     .then(() => {
       return { success: true };
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const addClientCategoryInteraction = async ({
+  country,
+  clientDetailId,
+  categoryId,
+  articleId,
+  podcastId,
+  videoId,
+  tagIds,
+}) => {
+  const mediaType = articleId ? "article" : videoId ? "video" : "podcast";
+  const mediaId = articleId || videoId || podcastId;
+  return await addClientCategoryInteractionQuery({
+    poolCountry: country,
+    clientDetailId,
+    categoryId,
+    mediaType,
+    mediaId,
+    tagIds,
+  })
+    .then((res) => {
+      return {
+        success: true,
+        data: res.rows[0],
+      };
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const getCategoryInteractions = async ({ country, clientDetailId }) => {
+  return await getCategoryInteractionsQuery({
+    poolCountry: country,
+    clientDetailId,
+  })
+    .then((res) => {
+      if (res.rowCount === 0) {
+        return [];
+      } else {
+        return res.rows.map((x) => ({
+          category_id: x.category_id,
+          article_id: x.media_type === "article" ? x.media_id : null,
+          count: x.count,
+          tag_ids: x.tag_ids,
+        }));
+      }
     })
     .catch((err) => {
       throw err;

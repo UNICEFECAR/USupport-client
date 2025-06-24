@@ -14,6 +14,8 @@ import {
   addClientPushNotificationTokenSchema,
   checkIsCouponAvailableSchema,
   deleteChatHistorySchema,
+  addClientCategoryInteractionSchema,
+  getCategoryInteractionsSchema,
 } from "#schemas/clientSchemas";
 
 import {
@@ -28,6 +30,8 @@ import {
   addClientPushNotificationToken,
   checkIsCouponAvailable,
   deleteChatHistory,
+  addClientCategoryInteraction,
+  getCategoryInteractions,
 } from "#controllers/clients";
 
 const router = express.Router();
@@ -299,6 +303,47 @@ router.put("/chat-history", populateUser, async (req, res, next) => {
     .strict()
     .validate({ client_detail_id, language, country, time })
     .then(deleteChatHistory)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.post(
+  "/add-category-interaction",
+  populateUser,
+  async (req, res, next) => {
+    /**
+     * #route   POST /client/v1/client/add-category-interaction
+     * #desc    Add category interaction
+     */
+    const country = req.header("x-country-alpha-2");
+    const language = req.header("x-language-alpha-2");
+
+    const clientDetailId = req.user.client_detail_id;
+    const payload = req.body;
+
+    return await addClientCategoryInteractionSchema
+      .noUnknown(true)
+      .strict()
+      .validate({ country, language, clientDetailId, ...payload })
+      .then(addClientCategoryInteraction)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  }
+);
+
+router.get("/category-interactions", populateUser, async (req, res, next) => {
+  /**
+   * #route   GET /client/v1/client/category-interactions
+   * #desc    Get category interactions
+   */
+  const country = req.header("x-country-alpha-2");
+  const clientDetailId = req.user.client_detail_id;
+
+  return await getCategoryInteractionsSchema
+    .noUnknown(true)
+    .strict()
+    .validate({ country, clientDetailId })
+    .then(getCategoryInteractions)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
