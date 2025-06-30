@@ -25,6 +25,8 @@ router.get("/", async (req, res, next) => {
     paymentMethod,
     userInteraction,
     specialisation,
+    userLocationLat,
+    userLocationLng,
   } = req.query;
 
   return await getOrganizationSchema
@@ -39,6 +41,10 @@ router.get("/", async (req, res, next) => {
       paymentMethod: paymentMethod || null,
       userInteraction: userInteraction || null,
       specialisation: specialisation || null,
+      userLocation: {
+        lat: Number(userLocationLat) || null,
+        lng: Number(userLocationLng) || null,
+      },
     })
     .then(getOrganizations)
     .then((result) => res.status(200).send(result))

@@ -9,6 +9,13 @@ export const getOrganizationSchema = yup.object().shape({
   paymentMethod: yup.string().notRequired().nullable(),
   userInteraction: yup.string().notRequired().nullable(),
   specialisation: yup.string().notRequired().nullable(),
+  userLocation: yup
+    .object()
+    .shape({
+      lat: yup.number().notRequired().nullable(),
+      lng: yup.number().notRequired().nullable(),
+    })
+    .nullable(),
 });
 
 export const organizationCountrySchema = yup.object().shape({
