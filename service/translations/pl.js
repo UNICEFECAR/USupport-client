@@ -13,4 +13,5 @@ export default {
     "Osiągnięto maksymalny limit konsultacji objętych tą kampanią",
   consultation_not_found_error: "Nie znaleziono konsultacji",
   error_occured: "Wystąpił błąd",
+  organization_not_found_error: "Nie znaleziono organizacji",
 };

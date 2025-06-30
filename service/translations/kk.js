@@ -13,4 +13,5 @@ export default {
     "Осы науқанда қамтылған кеңестердің максималды санына жетті",
   consultation_not_found_error: "Консультация табылмады",
   en_error_occured: "Қателік пайда болды",
+  organization_not_found_error: "Организация табылмады",
 };

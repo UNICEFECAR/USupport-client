@@ -13,4 +13,5 @@ export default {
     "The maximum amount of consultations covered by this campaign has been reached",
   consultation_not_found_error: "Consultation not found",
   error_occured: "An error occurred",
+  organization_not_found_error: "Organization not found",
 };
