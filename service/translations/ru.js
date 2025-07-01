@@ -14,4 +14,5 @@ export default {
     "Достигнуто максимальное количество консультаций, охваченных этой кампанией",
   consultation_not_found_error: "Консультация не найдена",
   an_error_occured: "Произошла ошибка",
+  organization_not_found_error: "Организация не найдена",
 };
