@@ -202,13 +202,14 @@ export const addInformationPortalSuggestionQuery = async ({
   poolCountry,
   client_id,
   suggestion,
+  type,
 }) =>
   await getDBPool("piiDb", poolCountry).query(
     `
-      INSERT INTO information_portal_suggestion (client_detail_id, suggestion)
-      VALUES ($1, $2)   
+      INSERT INTO platform_suggestion (client_detail_id, suggestion, type)
+      VALUES ($1, $2, $3)   
     `,
-    [client_id, suggestion]
+    [client_id, suggestion, type]
   );
 
 export const addClientRatingQuery = async ({
@@ -353,5 +354,20 @@ export const getCategoryInteractionsQuery = async ({
     WHERE client_detail_id = $1
     `,
     [clientDetailId]
+  );
+};
+
+export const addPlatformSuggestionQuery = async ({
+  poolCountry,
+  client_id,
+  suggestion,
+  type,
+}) => {
+  return await getDBPool("piiDb", poolCountry).query(
+    `
+      INSERT INTO platform_suggestion (client_detail_id, suggestion, type)
+      VALUES ($1, $2, $3)
+    `,
+    [client_id, suggestion, type]
   );
 };

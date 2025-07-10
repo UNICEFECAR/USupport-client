@@ -16,6 +16,7 @@ import {
   deleteChatHistorySchema,
   addClientCategoryInteractionSchema,
   getCategoryInteractionsSchema,
+  addPlatformSuggestionSchema,
 } from "#schemas/clientSchemas";
 
 import {
@@ -32,9 +33,32 @@ import {
   deleteChatHistory,
   addClientCategoryInteraction,
   getCategoryInteractions,
+  addPlatformSuggestion,
 } from "#controllers/clients";
 
 const router = express.Router();
+
+router.post(
+  "/add-platform-suggestion",
+  populateUser,
+  async (req, res, next) => {
+    /**
+     * #route   POST /client/v1/client/add-platform-suggestion
+     * #desc    Add platform suggestion
+     */
+    const country = req.header("x-country-alpha-2");
+    const client_id = req.user.client_detail_id;
+    const payload = req.body;
+
+    return await addPlatformSuggestionSchema
+      .noUnknown(true)
+      .strict()
+      .validate({ country, client_id, ...payload })
+      .then(addPlatformSuggestion)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  }
+);
 
 router.get("/", populateClient, async (req, res) => {
   /**
