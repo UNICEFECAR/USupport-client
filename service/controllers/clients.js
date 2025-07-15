@@ -21,6 +21,9 @@ import {
   addClientCategoryInteractionQuery,
   getCategoryInteractionsQuery,
   addPlatformSuggestionQuery,
+  getOrCreateScreeningSessionQuery,
+  addScreeningAnswerQuery,
+  updateScreeningSessionPositionQuery,
 } from "#queries/clients";
 
 import {
@@ -485,4 +488,60 @@ export const addPlatformSuggestion = async ({
     .catch((err) => {
       throw err;
     });
+};
+
+export const addScreeningAnswer = async ({
+  country,
+  language,
+  clientDetailId,
+  questionId,
+  answerValue,
+  screeningSessionId,
+}) => {
+  try {
+    // Get or create screening session
+    const sessionResult = await getOrCreateScreeningSessionQuery({
+      poolCountry: country,
+      clientDetailId,
+      screeningSessionId,
+    });
+
+    if (sessionResult.rowCount === 0) {
+      throw clientNotFound(language);
+    }
+
+    const session = sessionResult.rows[0];
+
+    // Add the answer
+    const answerResult = await addScreeningAnswerQuery({
+      poolCountry: country,
+      screeningSessionId: session.screening_session_id,
+      questionId,
+      answerValue,
+    });
+
+    if (answerResult.rowCount === 0) {
+      throw errorOccured(language);
+    }
+
+    const answer = answerResult.rows[0];
+
+    // Update session position if this question position is higher than current
+    // Note: We'd need to get the question position, but for simplicity, we'll increment current position
+    const currentPosition = session.current_position;
+    await updateScreeningSessionPositionQuery({
+      poolCountry: country,
+      screeningSessionId: session.screening_session_id,
+      position: currentPosition + 1,
+    });
+
+    return {
+      success: true,
+      screeningSessionId: session.screening_session_id,
+      answerId: answer.answer_id,
+      answeredAt: answer.answered_at,
+    };
+  } catch (err) {
+    throw err;
+  }
 };

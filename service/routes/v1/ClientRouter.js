@@ -17,6 +17,7 @@ import {
   addClientCategoryInteractionSchema,
   getCategoryInteractionsSchema,
   addPlatformSuggestionSchema,
+  addScreeningAnswerSchema,
 } from "#schemas/clientSchemas";
 
 import {
@@ -34,6 +35,7 @@ import {
   addClientCategoryInteraction,
   getCategoryInteractions,
   addPlatformSuggestion,
+  addScreeningAnswer,
 } from "#controllers/clients";
 
 const router = express.Router();
@@ -59,6 +61,25 @@ router.post(
       .catch(next);
   }
 );
+
+router.post("/screening/add-answer", populateUser, async (req, res, next) => {
+  /**
+   * #route   POST /client/v1/client/screening/add-answer
+   * #desc    Add screening answer
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+  const clientDetailId = req.user.client_detail_id;
+  const payload = req.body;
+
+  return await addScreeningAnswerSchema
+    .noUnknown(true)
+    .strict()
+    .validate({ country, language, clientDetailId, ...payload })
+    .then(addScreeningAnswer)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
 
 router.get("/", populateClient, async (req, res) => {
   /**

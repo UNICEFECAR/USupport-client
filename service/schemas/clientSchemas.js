@@ -191,3 +191,12 @@ export const getCategoryInteractionsSchema = yup.object().shape({
   clientDetailId: yup.string().uuid().required(),
   country: yup.string().required(),
 });
+
+export const addScreeningAnswerSchema = yup.object().shape({
+  client_detail_id: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+  questionId: yup.string().uuid().required(),
+  answerValue: yup.number().integer().min(1).max(5).required(),
+  screeningSessionId: yup.string().uuid().notRequired(),
+});

@@ -371,3 +371,68 @@ export const addPlatformSuggestionQuery = async ({
     [client_id, suggestion, type]
   );
 };
+
+export const getOrCreateScreeningSessionQuery = async ({
+  poolCountry,
+  clientDetailId,
+  screeningSessionId,
+}) => {
+  if (screeningSessionId) {
+    // Return existing session
+    return await getDBPool("clinicalDb", poolCountry).query(
+      `
+        SELECT screening_session_id, client_detail_id, started_at, completed_at, current_position, status
+        FROM screening_session
+        WHERE screening_session_id = $1 AND client_detail_id = $2
+        LIMIT 1
+      `,
+      [screeningSessionId, clientDetailId]
+    );
+  } else {
+    // Create new session
+    return await getDBPool("clinicalDb", poolCountry).query(
+      `
+        INSERT INTO screening_session (client_detail_id)
+        VALUES ($1)
+        RETURNING screening_session_id, client_detail_id, started_at, completed_at, current_position, status
+      `,
+      [clientDetailId]
+    );
+  }
+};
+
+export const addScreeningAnswerQuery = async ({
+  poolCountry,
+  screeningSessionId,
+  questionId,
+  answerValue,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      INSERT INTO screening_answer (screening_session_id, question_id, answer_value)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (screening_session_id, question_id)
+      DO UPDATE SET 
+        answer_value = EXCLUDED.answer_value,
+        answered_at = NOW()
+      RETURNING answer_id, screening_session_id, question_id, answer_value, answered_at
+    `,
+    [screeningSessionId, questionId, answerValue]
+  );
+};
+
+export const updateScreeningSessionPositionQuery = async ({
+  poolCountry,
+  screeningSessionId,
+  position,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      UPDATE screening_session
+      SET current_position = $1, updated_at = NOW()
+      WHERE screening_session_id = $2
+      RETURNING screening_session_id, current_position
+    `,
+    [position, screeningSessionId]
+  );
+};
