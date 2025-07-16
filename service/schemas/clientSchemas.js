@@ -133,6 +133,20 @@ export const addInformationPortalSuggestionSchema = yup.object().shape({
   suggestion: yup.string().required(),
 });
 
+export const addPlatformSuggestionSchema =
+  addInformationPortalSuggestionSchema.shape({
+    type: yup
+      .string()
+      .oneOf([
+        "information-portal",
+        "my-qa",
+        "consultations",
+        "organizations",
+        "mood-tracker",
+      ])
+      .required(),
+  });
+
 export const addClientRatingSchema = yup.object().shape({
   language: yup.string().required(),
   country: yup.string().required(),

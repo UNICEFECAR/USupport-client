@@ -20,6 +20,7 @@ import {
   deleteMoodTrackDataQuery,
   addClientCategoryInteractionQuery,
   getCategoryInteractionsQuery,
+  addPlatformSuggestionQuery,
 } from "#queries/clients";
 
 import {
@@ -460,6 +461,26 @@ export const getCategoryInteractions = async ({ country, clientDetailId }) => {
           tag_ids: x.tag_ids,
         }));
       }
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const addPlatformSuggestion = async ({
+  country,
+  client_id,
+  suggestion,
+  type,
+}) => {
+  return await addPlatformSuggestionQuery({
+    poolCountry: country,
+    client_id,
+    suggestion,
+    type,
+  })
+    .then(() => {
+      return { success: true };
     })
     .catch((err) => {
       throw err;
