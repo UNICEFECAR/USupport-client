@@ -24,6 +24,8 @@ import {
   getOrCreateScreeningSessionQuery,
   addScreeningAnswerQuery,
   updateScreeningSessionPositionQuery,
+  getClientAnswersForSessionByIdQuery,
+  updateScreeningSessionStatusQuery,
 } from "#queries/clients";
 
 import {
@@ -35,7 +37,7 @@ import {
   couponsLimitReached,
   errorOccured,
 } from "#utils/errors";
-import { deleteCacheItem } from "#utils/cache";
+import { deleteCacheItem, getCacheItem, setCacheItem } from "#utils/cache";
 
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
@@ -499,18 +501,44 @@ export const addScreeningAnswer = async ({
   screeningSessionId,
 }) => {
   try {
-    // Get or create screening session
-    const sessionResult = await getOrCreateScreeningSessionQuery({
-      poolCountry: country,
-      clientDetailId,
-      screeningSessionId,
-    });
+    const questionsCacheKey = `screening_questions`;
+    const questionsCacheItem = await getCacheItem(questionsCacheKey).catch(
+      (err) => {
+        console.log("Error getting item from cache: ", err);
+      }
+    );
 
-    if (sessionResult.rowCount === 0) {
-      throw clientNotFound(language);
+    const currentQuestion = questionsCacheItem.find(
+      (question) => question.questionId === questionId
+    );
+    const currentQuestionPosition = currentQuestion.position;
+
+    // Check if the session is stored in cache
+    const screeningSessionCacheKey = `screening_session_${country}_${clientDetailId}_${screeningSessionId}`;
+    const screeningSessionCacheItem = screeningSessionId
+      ? await getCacheItem(screeningSessionCacheKey).catch((err) => {
+          console.log("Error getting item from cache: ", err);
+        })
+      : null;
+
+    let session;
+
+    if (screeningSessionCacheItem) {
+      // if (false) {
+      session = screeningSessionCacheItem;
+    } else {
+      session = await getOrCreateScreeningSessionQuery({
+        poolCountry: country,
+        clientDetailId,
+        screeningSessionId,
+      })
+        .then((res) => {
+          return res.rows[0];
+        })
+        .catch((err) => {
+          throw err;
+        });
     }
-
-    const session = sessionResult.rows[0];
 
     // Add the answer
     const answerResult = await addScreeningAnswerQuery({
@@ -520,19 +548,106 @@ export const addScreeningAnswer = async ({
       answerValue,
     });
 
-    if (answerResult.rowCount === 0) {
-      throw errorOccured(language);
-    }
-
     const answer = answerResult.rows[0];
 
-    // Update session position if this question position is higher than current
-    // Note: We'd need to get the question position, but for simplicity, we'll increment current position
     const currentPosition = session.current_position;
-    await updateScreeningSessionPositionQuery({
-      poolCountry: country,
-      screeningSessionId: session.screening_session_id,
-      position: currentPosition + 1,
+
+    const newPosition =
+      currentQuestionPosition > currentPosition
+        ? currentQuestionPosition
+        : currentPosition + 1;
+
+    const updatedSessionData = {
+      ...session,
+      current_position: newPosition,
+      status: newPosition === 28 ? "completed" : "in_progress",
+    };
+
+    // If we are on the last question, the new position will become 28, so we don't need to update the position
+    if (newPosition !== 28) {
+      // Update session position if this question position is higher than current
+      // Note: We'd need to get the question position, but for simplicity, we'll increment current position
+      await updateScreeningSessionPositionQuery({
+        poolCountry: country,
+        screeningSessionId: session.screening_session_id,
+        position:
+          currentQuestionPosition > currentPosition
+            ? currentQuestionPosition
+            : currentPosition + 1,
+      });
+    } else {
+      // Get all user answers for the session, to calculate the score
+      const clientAnswers = await getClientAnswersForSessionByIdQuery({
+        poolCountry: country,
+        clientDetailId,
+        screeningSessionId: session.screening_session_id,
+      }).then((res) => {
+        if (res.rowCount === 0) {
+          return [];
+        } else {
+          return res.rows;
+        }
+      });
+
+      const {
+        psychological: psychologicalCount,
+        biological: biologicalCount,
+        social: socialCount,
+      } = questionsCacheItem.reduce(
+        (acc, question) => {
+          acc[question.dimension] = acc[question.dimension] || 0;
+          acc[question.dimension] += 1;
+          return acc;
+        },
+        { psychological: 0, biological: 0, social: 0 }
+      );
+
+      const { psychological, biological, social } = clientAnswers.reduce(
+        (acc, answer) => {
+          const question = questionsCacheItem.find(
+            (question) => question.questionId === answer.question_id
+          );
+          acc[question.dimension] = acc[question.dimension] || 0;
+          acc[question.dimension] += answer.answer_value;
+          return acc;
+        },
+        { psychological: 0, biological: 0, social: 0 }
+      );
+
+      const psychologicalScore = Math.round(psychological / psychologicalCount);
+      const biologicalScore = Math.round(biological / biologicalCount);
+      const socialScore = Math.round(social / socialCount);
+
+      const getScoreProfile = (score) => {
+        if (score >= 1 && score <= 2.4) {
+          return "low";
+        } else if (score >= 2.5 && score <= 3.9) {
+          return "moderate";
+        } else if (score >= 4 && score <= 5) {
+          return "high";
+        }
+      };
+
+      const psychologicalProfile = getScoreProfile(psychologicalScore);
+      const biologicalProfile = getScoreProfile(biologicalScore);
+      const socialProfile = getScoreProfile(socialScore);
+
+      await updateScreeningSessionStatusQuery({
+        poolCountry: country,
+        screeningSessionId: session.screening_session_id,
+        status: "completed",
+        psychologicalProfile,
+        biologicalProfile,
+        socialProfile,
+      });
+    }
+
+    await setCacheItem(
+      `screening_session_${country}_${clientDetailId}_${session.screening_session_id}`,
+      updatedSessionData,
+      60 * 60 * 3
+    ).catch((err) => {
+      console.log("Error saving item to cache: ", err);
     });
 
     return {
