@@ -25,6 +25,7 @@ router.get("/", async (req, res, next) => {
     paymentMethod,
     userInteraction,
     specialisation,
+    propertyType,
     userLocationLat,
     userLocationLng,
   } = req.query;
@@ -40,6 +41,7 @@ router.get("/", async (req, res, next) => {
       district: district || null,
       paymentMethod: paymentMethod || null,
       userInteraction: userInteraction || null,
+      propertyType: propertyType || null,
       specialisation: specialisation || null,
       userLocation: {
         lat: Number(userLocationLat) || null,
