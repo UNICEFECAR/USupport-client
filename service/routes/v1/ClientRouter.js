@@ -18,6 +18,10 @@ import {
   getCategoryInteractionsSchema,
   addPlatformSuggestionSchema,
   addScreeningAnswerSchema,
+  getAllScreeningQuestionsSchema,
+  getClientScreeningSessionsSchema,
+  getClientAnswersForSessionByIdSchema,
+  createScreeningSessionSchema,
 } from "#schemas/clientSchemas";
 
 import {
@@ -36,6 +40,10 @@ import {
   getCategoryInteractions,
   addPlatformSuggestion,
   addScreeningAnswer,
+  getAllScreeningQuestions,
+  getClientScreeningSessions,
+  getClientAnswersForSessionById,
+  createScreeningSession,
 } from "#controllers/clients";
 
 const router = express.Router();
@@ -80,6 +88,87 @@ router.post("/screening/add-answer", populateUser, async (req, res, next) => {
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
+
+router.get("/screening/questions", async (req, res, next) => {
+  /**
+   * #route   GET /client/v1/client/screening/questions
+   * #desc    Get all screening questions sorted by position
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+
+  return await getAllScreeningQuestionsSchema
+    .noUnknown(true)
+    .strict()
+    .validate({ country, language })
+    .then(getAllScreeningQuestions)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.get("/screening/sessions", populateUser, async (req, res, next) => {
+  /**
+   * #route   GET /client/v1/client/screening/sessions
+   * #desc    Get all screening sessions overview for the current client (without detailed answers)
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+  const clientDetailId = req.user.client_detail_id;
+
+  return await getClientScreeningSessionsSchema
+    .noUnknown(true)
+    .strict()
+    .validate({ country, language, clientDetailId })
+    .then(getClientScreeningSessions)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.get("/screening/answers", populateUser, async (req, res, next) => {
+  /**
+   * #route   GET /client/v1/client/screening/answers
+   * #desc    Get screening answers for a session
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+  const clientDetailId = req.user.client_detail_id;
+  const { sessionId } = req.query;
+
+  return await getClientAnswersForSessionByIdSchema
+    .noUnknown(true)
+    .strict()
+    .validate({
+      country,
+      language,
+      clientDetailId,
+      screeningSessionId: sessionId,
+    })
+    .then(getClientAnswersForSessionById)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.post(
+  "/screening/create-session",
+  populateUser,
+  async (req, res, next) => {
+    /**
+     * #route   POST /client/v1/client/screening/create-session
+     * #desc    Create a new screening session
+     */
+    const country = req.header("x-country-alpha-2");
+    const language = req.header("x-language-alpha-2");
+    const clientDetailId = req.user.client_detail_id;
+
+    return await createScreeningSessionSchema
+      .noUnknown(true)
+      .strict()
+      .validate({ country, language, clientDetailId })
+      .then(createScreeningSession)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  }
+);
 
 router.get("/", populateClient, async (req, res) => {
   /**

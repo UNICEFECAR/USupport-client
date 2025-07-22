@@ -193,10 +193,34 @@ export const getCategoryInteractionsSchema = yup.object().shape({
 });
 
 export const addScreeningAnswerSchema = yup.object().shape({
-  client_detail_id: yup.string().uuid().required(),
+  clientDetailId: yup.string().uuid().required(),
   country: yup.string().required(),
   language: yup.string().required(),
   questionId: yup.string().uuid().required(),
   answerValue: yup.number().integer().min(1).max(5).required(),
-  screeningSessionId: yup.string().uuid().notRequired(),
+  screeningSessionId: yup.string().uuid().nullable(),
+});
+
+export const getAllScreeningQuestionsSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+});
+
+export const getClientScreeningSessionsSchema = yup.object().shape({
+  clientDetailId: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+});
+
+export const getClientAnswersForSessionByIdSchema = yup.object().shape({
+  clientDetailId: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+  screeningSessionId: yup.string().uuid().required(),
+});
+
+export const createScreeningSessionSchema = yup.object().shape({
+  clientDetailId: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
 });

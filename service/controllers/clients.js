@@ -24,7 +24,10 @@ import {
   getOrCreateScreeningSessionQuery,
   addScreeningAnswerQuery,
   updateScreeningSessionPositionQuery,
+  getAllScreeningQuestionsQuery,
+  getClientScreeningSessionsQuery,
   getClientAnswersForSessionByIdQuery,
+  createScreeningSessionQuery,
   updateScreeningSessionStatusQuery,
 } from "#queries/clients";
 
@@ -36,6 +39,7 @@ import {
   clientLimitReached,
   couponsLimitReached,
   errorOccured,
+  countryNotSupported,
 } from "#utils/errors";
 import { deleteCacheItem, getCacheItem, setCacheItem } from "#utils/cache";
 
@@ -656,6 +660,138 @@ export const addScreeningAnswer = async ({
       answerId: answer.answer_id,
       answeredAt: answer.answered_at,
     };
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getAllScreeningQuestions = async ({ country, language }) => {
+  try {
+    if (country !== "RO") {
+      throw countryNotSupported(language);
+    }
+
+    const cacheKey = "screening_questions";
+    const cacheItem = await getCacheItem(cacheKey).catch((err) => {
+      console.log("Error getting item from cache: ", err);
+    });
+
+    if (cacheItem) {
+      return cacheItem;
+    }
+
+    return await getAllScreeningQuestionsQuery({
+      poolCountry: country,
+    }).then(async (res) => {
+      const questions = res.rows.map((question) => ({
+        questionId: question.question_id,
+        position: question.position,
+        questionText: question.question_text,
+        dimension: question.dimension,
+        isCritical: question.is_critical,
+        createdAt: question.created_at,
+      }));
+
+      await setCacheItem(cacheKey, questions, 60 * 60 * 24 * 30).catch(
+        (err) => {
+          console.log("Erro saving item to cache: ", err);
+        }
+      );
+
+      return questions;
+    });
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getClientScreeningSessions = async ({
+  country,
+  language,
+  clientDetailId,
+}) => {
+  try {
+    if (country !== "RO") {
+      throw countryNotSupported(language);
+    }
+
+    return await getClientScreeningSessionsQuery({
+      poolCountry: country,
+      clientDetailId,
+    }).then((res) => {
+      const sessions = res.rows.map((session) => ({
+        screeningSessionId: session.screening_session_id,
+        clientDetailId: session.client_detail_id,
+        startedAt: session.started_at,
+        completedAt: session.completed_at,
+        currentPosition: session.current_position,
+        status: session.status,
+        createdAt: session.created_at,
+        updatedAt: session.updated_at,
+        totalQuestions: 27,
+        completionPercentage: Math.round(
+          (parseInt(session.current_position - 1) / 27) * 100
+        ),
+      }));
+      return sessions;
+    });
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getClientAnswersForSessionById = async ({
+  country,
+  language,
+  clientDetailId,
+  screeningSessionId,
+}) => {
+  return await getClientAnswersForSessionByIdQuery({
+    poolCountry: country,
+    clientDetailId,
+    screeningSessionId,
+  }).then((res) => {
+    if (res.rowCount === 0) {
+      return [];
+    } else {
+      // Convert the array of rows into a single object mapping question_id to answer_value
+      const answersObj = {};
+      res.rows.forEach((x) => {
+        answersObj[x.question_id] = x.answer_value;
+      });
+      return answersObj;
+    }
+  });
+};
+
+export const createScreeningSession = async ({
+  country,
+  language,
+  clientDetailId,
+}) => {
+  try {
+    if (country !== "RO") {
+      throw countryNotSupported(language);
+    }
+
+    return await createScreeningSessionQuery({
+      poolCountry: country,
+      clientDetailId,
+    }).then((res) => {
+      const session = res.rows[0];
+      return {
+        screeningSessionId: session.screening_session_id,
+        clientDetailId: session.client_detail_id,
+        startedAt: session.started_at,
+        completedAt: session.completed_at,
+        currentPosition: session.current_position,
+        status: session.status,
+        createdAt: session.created_at,
+        updatedAt: session.updated_at,
+        totalQuestions: 27,
+        completionPercentage: 0,
+      };
+    });
   } catch (err) {
     throw err;
   }

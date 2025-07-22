@@ -436,3 +436,81 @@ export const updateScreeningSessionPositionQuery = async ({
     [position, screeningSessionId]
   );
 };
+
+export const getAllScreeningQuestionsQuery = async ({ poolCountry }) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      SELECT question_id, position, question_text, dimension, is_critical, created_at
+      FROM screening_question
+      ORDER BY position ASC
+    `
+  );
+};
+
+export const getClientScreeningSessionsQuery = async ({
+  poolCountry,
+  clientDetailId,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      SELECT *
+      FROM screening_session ss
+      WHERE ss.client_detail_id = $1
+      ORDER BY ss.created_at DESC
+    `,
+    [clientDetailId]
+  );
+};
+
+export const getClientAnswersForSessionByIdQuery = async ({
+  poolCountry,
+  screeningSessionId,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      SELECT *
+      FROM screening_answer
+      WHERE screening_session_id = $1
+    `,
+    [screeningSessionId]
+  );
+};
+
+export const createScreeningSessionQuery = async ({
+  poolCountry,
+  clientDetailId,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      INSERT INTO screening_session (client_detail_id)
+      VALUES ($1)
+      RETURNING screening_session_id, client_detail_id, started_at, completed_at, current_position, status, created_at, updated_at
+    `,
+    [clientDetailId]
+  );
+};
+
+export const updateScreeningSessionStatusQuery = async ({
+  poolCountry,
+  screeningSessionId,
+  status,
+  psychologicalProfile,
+  biologicalProfile,
+  socialProfile,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      UPDATE screening_session
+      SET status = $1, updated_at = NOW(), psychological_profile = $3, biological_profile = $4, social_profile = $5
+      WHERE screening_session_id = $2
+      RETURNING screening_session_id, status
+    `,
+    [
+      status,
+      screeningSessionId,
+      psychologicalProfile,
+      biologicalProfile,
+      socialProfile,
+    ]
+  );
+};
