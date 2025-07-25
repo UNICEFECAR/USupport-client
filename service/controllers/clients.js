@@ -29,6 +29,7 @@ import {
   getClientAnswersForSessionByIdQuery,
   createScreeningSessionQuery,
   updateScreeningSessionStatusQuery,
+  updateClientHasCheckedBaselineAssessmentQuery,
 } from "#queries/clients";
 
 import {
@@ -567,6 +568,8 @@ export const addScreeningAnswer = async ({
       status: newPosition === 28 ? "completed" : "in_progress",
     };
 
+    let finalResult = null;
+
     // If we are on the last question, the new position will become 28, so we don't need to update the position
     if (newPosition !== 28) {
       // Update session position if this question position is higher than current
@@ -644,6 +647,12 @@ export const addScreeningAnswer = async ({
         biologicalProfile,
         socialProfile,
       });
+
+      finalResult = {
+        psychologicalProfile,
+        biologicalProfile,
+        socialProfile,
+      };
     }
 
     await setCacheItem(
@@ -659,6 +668,7 @@ export const addScreeningAnswer = async ({
       screeningSessionId: session.screening_session_id,
       answerId: answer.answer_id,
       answeredAt: answer.answered_at,
+      finalResult,
     };
   } catch (err) {
     throw err;
@@ -732,6 +742,11 @@ export const getClientScreeningSessions = async ({
         completionPercentage: Math.round(
           (parseInt(session.current_position - 1) / 27) * 100
         ),
+        finalResult: {
+          psychological: session.psychological_profile,
+          biological: session.biological_profile,
+          social: session.social_profile,
+        },
       }));
       return sessions;
     });
@@ -795,4 +810,26 @@ export const createScreeningSession = async ({
   } catch (err) {
     throw err;
   }
+};
+
+export const updateClientHasCheckedBaselineAssessment = async ({
+  country,
+  language,
+  clientDetailId,
+  hasCheckedBaselineAssessment,
+}) => {
+  return await updateClientHasCheckedBaselineAssessmentQuery({
+    poolCountry: country,
+    clientDetailId,
+    hasCheckedBaselineAssessment,
+  })
+    .then(() => {
+      return {
+        success: true,
+      };
+    })
+    .catch((err) => {
+      console.log(err);
+      throw clientNotFound(language);
+    });
 };

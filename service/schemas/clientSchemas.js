@@ -224,3 +224,12 @@ export const createScreeningSessionSchema = yup.object().shape({
   country: yup.string().required(),
   language: yup.string().required(),
 });
+
+export const updateClientHasCheckedBaselineAssessmentSchema = yup
+  .object()
+  .shape({
+    clientDetailId: yup.string().uuid().required(),
+    country: yup.string().required(),
+    language: yup.string().required(),
+    hasCheckedBaselineAssessment: yup.boolean().required(),
+  });

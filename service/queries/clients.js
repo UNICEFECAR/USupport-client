@@ -514,3 +514,18 @@ export const updateScreeningSessionStatusQuery = async ({
     ]
   );
 };
+
+export const updateClientHasCheckedBaselineAssessmentQuery = async ({
+  poolCountry,
+  clientDetailId,
+  hasCheckedBaselineAssessment,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+      UPDATE client_detail 
+      SET has_checked_baseline_assessment = $1
+      WHERE client_detail_id = $2
+      RETURNING *;
+    `,
+    [hasCheckedBaselineAssessment, clientDetailId]
+  );

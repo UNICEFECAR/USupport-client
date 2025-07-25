@@ -22,6 +22,7 @@ import {
   getClientScreeningSessionsSchema,
   getClientAnswersForSessionByIdSchema,
   createScreeningSessionSchema,
+  updateClientHasCheckedBaselineAssessmentSchema,
 } from "#schemas/clientSchemas";
 
 import {
@@ -44,6 +45,7 @@ import {
   getClientScreeningSessions,
   getClientAnswersForSessionById,
   createScreeningSession,
+  updateClientHasCheckedBaselineAssessment,
 } from "#controllers/clients";
 
 const router = express.Router();
@@ -481,5 +483,28 @@ router.get("/category-interactions", populateUser, async (req, res, next) => {
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
+
+router.patch(
+  "/has-checked-baseline-assesment",
+  populateUser,
+  async (req, res, next) => {
+    /**
+     * #route   PATCH /client/v1/client/has-checked-baseline-assesment
+     * #desc    Update the client has checked baseline assessment
+     */
+    const country = req.header("x-country-alpha-2");
+    const language = req.header("x-language-alpha-2");
+    const clientDetailId = req.user.client_detail_id;
+    const payload = req.body;
+
+    return await updateClientHasCheckedBaselineAssessmentSchema
+      .noUnknown(true)
+      .strict()
+      .validate({ country, language, clientDetailId, ...payload })
+      .then(updateClientHasCheckedBaselineAssessment)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  }
+);
 
 export { router };
