@@ -26,10 +26,10 @@ export const getOrganizationsQuery = async ({
           o.created_by,
           o.created_at,
           o.district_id,
+          o.work_with,
           ST_X(o.geolocation) AS longitude,
           ST_Y(o.geolocation) AS latitude,
           d.name AS district,
-          COALESCE(ww.work_with, '[]'::json) AS work_with,
           COALESCE(sp.specialisations, '[]'::json) AS specialisations,
           COALESCE(pm.payment_methods, '[]'::json) AS payment_methods,
           COALESCE(ui.user_interactions, '[]'::json) AS user_interactions,
@@ -49,19 +49,6 @@ export const getOrganizationsQuery = async ({
 
         FROM organization o
         LEFT JOIN district d ON o.district_id = d.district_id
-
-        LEFT JOIN (
-          SELECT 
-            organization_id,
-            JSON_AGG(JSON_BUILD_OBJECT(
-              'id', owl.organization_work_with_id,
-              'topic', ow.topic
-            )) AS work_with
-          FROM organization_work_with_links owl
-          LEFT JOIN organization_work_with ow
-            ON owl.organization_work_with_id = ow.organization_work_with_id
-          GROUP BY organization_id
-        ) ww ON o.organization_id = ww.organization_id
 
         LEFT JOIN (
           SELECT 
@@ -120,13 +107,8 @@ export const getOrganizationsQuery = async ({
           -- Search filter
           ($1::text IS NULL OR o.name ILIKE '%' || $1 || '%')
           
-          -- Work with filter
-          AND ($2::uuid IS NULL OR EXISTS (
-                SELECT 1
-                FROM organization_work_with_links
-                WHERE organization_id = o.organization_id
-                  AND organization_work_with_id = $2
-              ))
+          -- Work with filter - now searches in the text field instead of relationship
+          AND ($2::text IS NULL OR o.work_with ILIKE '%' || $2 || '%')
           
           AND ($3::uuid IS NULL OR o.district_id = $3)
           
@@ -215,31 +197,16 @@ export const getOrganizationByIdQuery = async ({ country, organizationId }) => {
       organization.created_by,
       organization.created_at,
       organization.district_id,
+      organization.work_with,
       ST_X(organization.geolocation) as longitude, 
       ST_Y(organization.geolocation) as latitude,
       district.name as district,
-      COALESCE(work_with_agg.work_with, '[]'::json) as work_with,
       COALESCE(specialisations_agg.specialisations, '[]'::json) as specialisations,
       COALESCE(payment_methods_agg.payment_methods, '[]'::json) as payment_methods,
       COALESCE(user_interactions_agg.user_interactions, '[]'::json) as user_interactions,
       COALESCE(property_types_agg.property_types, '[]'::json) as property_types
     FROM organization
     LEFT JOIN district ON organization.district_id = district.district_id
-    
-    LEFT JOIN (
-      SELECT 
-        organization_id,
-        JSON_AGG(JSON_BUILD_OBJECT(
-          'id', organization_work_with_links.organization_work_with_id,
-          'topic', organization_work_with.topic
-        )) as work_with
-      FROM organization_work_with_links
-      LEFT JOIN organization_work_with ON (
-        organization_work_with_links.organization_work_with_id = organization_work_with.organization_work_with_id
-      )
-      WHERE organization_work_with_links.organization_id = $1
-      GROUP BY organization_id
-    ) work_with_agg ON organization.organization_id = work_with_agg.organization_id
     
     LEFT JOIN (
       SELECT 
