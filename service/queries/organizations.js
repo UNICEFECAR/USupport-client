@@ -3,7 +3,6 @@ import { getDBPool } from "#utils/dbConfig";
 export const getOrganizationsQuery = async ({
   country,
   search,
-  workWith,
   district,
   paymentMethod,
   userInteraction,
@@ -26,7 +25,6 @@ export const getOrganizationsQuery = async ({
           o.created_by,
           o.created_at,
           o.district_id,
-          o.work_with,
           ST_X(o.geolocation) AS longitude,
           ST_Y(o.geolocation) AS latitude,
           d.name AS district,
@@ -37,12 +35,12 @@ export const getOrganizationsQuery = async ({
           
           -- If user location is provided, calculate distance using PostGIS
           CASE
-            WHEN $8::double precision IS NOT NULL
-            AND $9::double precision IS NOT NULL
+            WHEN $7::double precision IS NOT NULL
+            AND $8::double precision IS NOT NULL
             THEN
               ST_Distance(
                 o.geolocation::geography,
-                ST_Point($9::double precision, $8::double precision)::geography
+                ST_Point($8::double precision, $7::double precision)::geography
               ) / 1000.0  -- Convert meters to kilometers
             ELSE NULL
           END AS distance_km
@@ -107,37 +105,34 @@ export const getOrganizationsQuery = async ({
           -- Search filter
           ($1::text IS NULL OR o.name ILIKE '%' || $1 || '%')
           
-          -- Work with filter - now searches in the text field instead of relationship
-          AND ($2::text IS NULL OR o.work_with ILIKE '%' || $2 || '%')
+          AND ($2::uuid IS NULL OR o.district_id = $2)
           
-          AND ($3::uuid IS NULL OR o.district_id = $3)
-          
-          AND ($4::uuid IS NULL OR EXISTS (
+          AND ($3::uuid IS NULL OR EXISTS (
                 SELECT 1
                 FROM organization_payment_method_links
                 WHERE organization_id = o.organization_id
-                  AND payment_method_id = $4
+                  AND payment_method_id = $3
+              ))
+          
+          AND ($4::uuid IS NULL OR EXISTS (
+                SELECT 1
+                FROM organization_user_interaction_links
+                WHERE organization_id = o.organization_id
+                  AND user_interaction_id = $4
               ))
           
           AND ($5::uuid IS NULL OR EXISTS (
                 SELECT 1
-                FROM organization_user_interaction_links
+                FROM organization_specialisation_links
                 WHERE organization_id = o.organization_id
-                  AND user_interaction_id = $5
+                  AND organization_specialisation_id = $5
               ))
           
           AND ($6::uuid IS NULL OR EXISTS (
                 SELECT 1
-                FROM organization_specialisation_links
-                WHERE organization_id = o.organization_id
-                  AND organization_specialisation_id = $6
-              ))
-          
-          AND ($7::uuid IS NULL OR EXISTS (
-                SELECT 1
                 FROM organization_property_type_links
                 WHERE organization_id = o.organization_id
-                  AND organization_property_type_id = $7
+                  AND organization_property_type_id = $6
               ))
       )
 
@@ -155,7 +150,6 @@ export const getOrganizationsQuery = async ({
         longitude,
         latitude,
         district,
-        work_with,
         specialisations,
         payment_methods,
         user_interactions,
@@ -171,7 +165,6 @@ export const getOrganizationsQuery = async ({
     `,
     [
       search,
-      workWith,
       district,
       paymentMethod,
       userInteraction,
@@ -197,7 +190,6 @@ export const getOrganizationByIdQuery = async ({ country, organizationId }) => {
       organization.created_by,
       organization.created_at,
       organization.district_id,
-      organization.work_with,
       ST_X(organization.geolocation) as longitude, 
       ST_Y(organization.geolocation) as latitude,
       district.name as district,

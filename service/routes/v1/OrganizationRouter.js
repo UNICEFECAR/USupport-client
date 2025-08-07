@@ -20,7 +20,6 @@ router.get("/", async (req, res, next) => {
   const language = req.header("x-language-alpha-2");
   const {
     search,
-    workWith,
     district,
     paymentMethod,
     userInteraction,
@@ -37,7 +36,6 @@ router.get("/", async (req, res, next) => {
       country,
       language,
       search: search || null,
-      workWith: workWith || null,
       district: district || null,
       paymentMethod: paymentMethod || null,
       userInteraction: userInteraction || null,
