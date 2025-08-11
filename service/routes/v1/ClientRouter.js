@@ -1,6 +1,10 @@
 import express from "express";
 
-import { populateClient, populateUser } from "#middlewares/populateMiddleware";
+import {
+  populateClient,
+  populateUser,
+  populateExistingUser,
+} from "#middlewares/populateMiddleware";
 
 import {
   getClientByIdSchema,
@@ -17,6 +21,7 @@ import {
   addClientCategoryInteractionSchema,
   getCategoryInteractionsSchema,
   addPlatformSuggestionSchema,
+  addSOSCenterClickSchema,
 } from "#schemas/clientSchemas";
 
 import {
@@ -34,6 +39,7 @@ import {
   addClientCategoryInteraction,
   getCategoryInteractions,
   addPlatformSuggestion,
+  addSOSCenterClick,
 } from "#controllers/clients";
 
 const router = express.Router();
@@ -371,5 +377,29 @@ router.get("/category-interactions", populateUser, async (req, res, next) => {
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
+
+router.post(
+  "/sos-center-click",
+  populateExistingUser,
+  async (req, res, next) => {
+    console.log("here");
+    /**
+     * #route   POST /client/v1/client/sos-center-click
+     * #desc    Track SOS center click interaction
+     */
+    const country = req.header("x-country-alpha-2");
+    const language = req.header("x-language-alpha-2");
+    const clientDetailId = req.user?.client_detail_id || null;
+    const payload = req.body;
+
+    return await addSOSCenterClickSchema
+      .noUnknown(true)
+      .strict()
+      .validate({ country, language, clientDetailId, ...payload })
+      .then(addSOSCenterClick)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  }
+);
 
 export { router };
