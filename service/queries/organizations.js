@@ -102,8 +102,9 @@ export const getOrganizationsQuery = async ({
         ) pt ON o.organization_id = pt.organization_id
 
         WHERE 
-          -- Search filter
-          ($1::text IS NULL OR o.name ILIKE '%' || $1 || '%')
+          (o.is_deleted IS FALSE OR o.is_deleted IS NULL)
+          
+          AND ($1::text IS NULL OR o.name ILIKE '%' || $1 || '%')
           
           AND ($2::uuid IS NULL OR o.district_id = $2)
           
@@ -260,7 +261,8 @@ export const getOrganizationByIdQuery = async ({ country, organizationId }) => {
       GROUP BY organization_id
     ) property_types_agg ON organization.organization_id = property_types_agg.organization_id
     
-    WHERE organization.organization_id = $1
+    WHERE organization.organization_id = $1 
+      AND (organization.is_deleted IS FALSE OR organization.is_deleted IS NULL)
     `,
     [organizationId]
   );

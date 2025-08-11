@@ -21,6 +21,7 @@ import {
   addClientCategoryInteractionQuery,
   getCategoryInteractionsQuery,
   addPlatformSuggestionQuery,
+  addSOSCenterClickQuery,
 } from "#queries/clients";
 
 import {
@@ -484,5 +485,29 @@ export const addPlatformSuggestion = async ({
     })
     .catch((err) => {
       throw err;
+    });
+};
+
+export const addSOSCenterClick = async ({
+  country,
+  language,
+  clientDetailId,
+  sosCenterId,
+  isMain,
+  platform,
+}) => {
+  return await addSOSCenterClickQuery({
+    poolCountry: country,
+    clientDetailId,
+    sosCenterId,
+    isMain,
+    platform,
+  })
+    .then(() => {
+      return { success: true };
+    })
+    .catch((err) => {
+      console.log("Error adding SOS center click: ", err);
+      return { success: false };
     });
 };

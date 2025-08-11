@@ -191,3 +191,12 @@ export const getCategoryInteractionsSchema = yup.object().shape({
   clientDetailId: yup.string().uuid().required(),
   country: yup.string().required(),
 });
+
+export const addSOSCenterClickSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  clientDetailId: yup.string().uuid().nullable(),
+  sosCenterId: yup.number().integer().nullable(),
+  isMain: yup.boolean().required(),
+  platform: yup.string().required(),
+});
