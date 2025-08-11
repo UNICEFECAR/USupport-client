@@ -51,3 +51,12 @@ export const populateUser = async (req, res, next) => {
 
   return next();
 };
+
+export const populateExistingUser = async (req, res, next) => {
+  const user_id = req.header("x-user-id");
+  if (!user_id || user_id === "null") {
+    return next();
+  }
+
+  populateUser(req, res, next);
+};
