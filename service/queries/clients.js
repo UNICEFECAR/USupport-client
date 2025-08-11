@@ -529,3 +529,19 @@ export const updateClientHasCheckedBaselineAssessmentQuery = async ({
     `,
     [hasCheckedBaselineAssessment, clientDetailId]
   );
+export const addSOSCenterClickQuery = async ({
+  poolCountry,
+  clientDetailId,
+  sosCenterId,
+  isMain,
+  platform,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      INSERT INTO sos_center_click (sos_center_id, is_main, client_detail_id, platform)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id;
+    `,
+    [sosCenterId, isMain, clientDetailId || null, platform]
+  );
+};

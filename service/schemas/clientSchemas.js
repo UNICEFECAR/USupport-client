@@ -233,3 +233,11 @@ export const updateClientHasCheckedBaselineAssessmentSchema = yup
     language: yup.string().required(),
     hasCheckedBaselineAssessment: yup.boolean().required(),
   });
+export const addSOSCenterClickSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  clientDetailId: yup.string().uuid().nullable(),
+  sosCenterId: yup.number().integer().nullable(),
+  isMain: yup.boolean().required(),
+  platform: yup.string().required(),
+});

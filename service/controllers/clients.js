@@ -30,6 +30,7 @@ import {
   createScreeningSessionQuery,
   updateScreeningSessionStatusQuery,
   updateClientHasCheckedBaselineAssessmentQuery,
+  addSOSCenterClickQuery,
 } from "#queries/clients";
 
 import {
@@ -831,5 +832,29 @@ export const updateClientHasCheckedBaselineAssessment = async ({
     .catch((err) => {
       console.log(err);
       throw clientNotFound(language);
+    });
+};
+
+export const addSOSCenterClick = async ({
+  country,
+  language,
+  clientDetailId,
+  sosCenterId,
+  isMain,
+  platform,
+}) => {
+  return await addSOSCenterClickQuery({
+    poolCountry: country,
+    clientDetailId,
+    sosCenterId,
+    isMain,
+    platform,
+  })
+    .then(() => {
+      return { success: true };
+    })
+    .catch((err) => {
+      console.log("Error adding SOS center click: ", err);
+      return { success: false };
     });
 };
