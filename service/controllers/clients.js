@@ -44,11 +44,14 @@ import {
   countryNotSupported,
 } from "#utils/errors";
 import { deleteCacheItem, getCacheItem, setCacheItem } from "#utils/cache";
+import { calculateBaselineAssessmentScore } from "#utils/helperFunctions";
 
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 const AWS_REGION = process.env.AWS_REGION;
 const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+
+const QUESTIONS_COUNT = 27;
 
 export const getClientById = async ({ country, language, clientId }) => {
   return await getClientByIdQuery({
@@ -505,6 +508,7 @@ export const addScreeningAnswer = async ({
   questionId,
   answerValue,
   screeningSessionId,
+  currentPosition,
 }) => {
   try {
     const questionsCacheKey = `screening_questions`;
@@ -519,55 +523,34 @@ export const addScreeningAnswer = async ({
     );
     const currentQuestionPosition = currentQuestion.position;
 
-    // Check if the session is stored in cache
-    const screeningSessionCacheKey = `screening_session_${country}_${clientDetailId}_${screeningSessionId}`;
-    const screeningSessionCacheItem = screeningSessionId
-      ? await getCacheItem(screeningSessionCacheKey).catch((err) => {
-          console.log("Error getting item from cache: ", err);
-        })
-      : null;
-
-    let session;
-
-    if (screeningSessionCacheItem) {
-      // if (false) {
-      session = screeningSessionCacheItem;
-    } else {
-      session = await getOrCreateScreeningSessionQuery({
-        poolCountry: country,
-        clientDetailId,
-        screeningSessionId,
+    const session = await getOrCreateScreeningSessionQuery({
+      poolCountry: country,
+      clientDetailId,
+      screeningSessionId,
+    })
+      .then((res) => {
+        return res.rows[0];
       })
-        .then((res) => {
-          return res.rows[0];
-        })
-        .catch((err) => {
-          throw err;
-        });
-    }
+      .catch((err) => {
+        throw err;
+      });
 
     // Add the answer
     const answerResult = await addScreeningAnswerQuery({
       poolCountry: country,
-      screeningSessionId: session.screening_session_id,
+      screeningSessionId,
       questionId,
       answerValue,
     });
 
     const answer = answerResult.rows[0];
 
-    const currentPosition = session.current_position;
+    // const currentPosition = session.current_position;
 
     const newPosition =
       currentQuestionPosition > currentPosition
         ? currentQuestionPosition
         : currentPosition + 1;
-
-    const updatedSessionData = {
-      ...session,
-      current_position: newPosition,
-      status: newPosition === 28 ? "completed" : "in_progress",
-    };
 
     let finalResult = null;
 
@@ -598,19 +581,10 @@ export const addScreeningAnswer = async ({
       });
 
       const {
-        psychological: psychologicalCount,
-        biological: biologicalCount,
-        social: socialCount,
-      } = questionsCacheItem.reduce(
-        (acc, question) => {
-          acc[question.dimension] = acc[question.dimension] || 0;
-          acc[question.dimension] += 1;
-          return acc;
-        },
-        { psychological: 0, biological: 0, social: 0 }
-      );
-
-      const { psychological, biological, social } = clientAnswers.reduce(
+        psychological: psychologicalScore,
+        biological: biologicalScore,
+        social: socialScore,
+      } = clientAnswers.reduce(
         (acc, answer) => {
           const question = questionsCacheItem.find(
             (question) => question.questionId === answer.question_id
@@ -622,47 +596,24 @@ export const addScreeningAnswer = async ({
         { psychological: 0, biological: 0, social: 0 }
       );
 
-      const psychologicalScore = Math.round(psychological / psychologicalCount);
-      const biologicalScore = Math.round(biological / biologicalCount);
-      const socialScore = Math.round(social / socialCount);
-
-      const getScoreProfile = (score) => {
-        if (score >= 1 && score <= 2.4) {
-          return "low";
-        } else if (score >= 2.5 && score <= 3.9) {
-          return "moderate";
-        } else if (score >= 4 && score <= 5) {
-          return "high";
-        }
-      };
-
-      const psychologicalProfile = getScoreProfile(psychologicalScore);
-      const biologicalProfile = getScoreProfile(biologicalScore);
-      const socialProfile = getScoreProfile(socialScore);
+      finalResult = await calculateBaselineAssessmentScore(
+        {
+          psychological: psychologicalScore,
+          biological: biologicalScore,
+          social: socialScore,
+        },
+        country
+      );
 
       await updateScreeningSessionStatusQuery({
         poolCountry: country,
         screeningSessionId: session.screening_session_id,
         status: "completed",
-        psychologicalProfile,
-        biologicalProfile,
-        socialProfile,
+        psychologicalScore,
+        biologicalScore,
+        socialScore,
       });
-
-      finalResult = {
-        psychologicalProfile,
-        biologicalProfile,
-        socialProfile,
-      };
     }
-
-    await setCacheItem(
-      `screening_session_${country}_${clientDetailId}_${session.screening_session_id}`,
-      updatedSessionData,
-      60 * 60 * 3
-    ).catch((err) => {
-      console.log("Error saving item to cache: ", err);
-    });
 
     return {
       success: true,
@@ -726,7 +677,7 @@ export const getClientScreeningSessions = async ({
       throw countryNotSupported(language);
     }
 
-    return await getClientScreeningSessionsQuery({
+    const sessions = await getClientScreeningSessionsQuery({
       poolCountry: country,
       clientDetailId,
     }).then((res) => {
@@ -739,18 +690,38 @@ export const getClientScreeningSessions = async ({
         status: session.status,
         createdAt: session.created_at,
         updatedAt: session.updated_at,
-        totalQuestions: 27,
+        totalQuestions: QUESTIONS_COUNT,
         completionPercentage: Math.round(
-          (parseInt(session.current_position - 1) / 27) * 100
+          (parseInt(session.current_position - 1) / QUESTIONS_COUNT) * 100
         ),
         finalResult: {
-          psychological: session.psychological_profile,
-          biological: session.biological_profile,
-          social: session.social_profile,
+          psychological: session.psychological_score,
+          biological: session.biological_score,
+          social: session.social_score,
         },
       }));
       return sessions;
     });
+
+    // Calculate the final result for each session
+    await Promise.all(
+      sessions.map(async (session, index) => {
+        if (session.status === "completed") {
+          const finalResult = await calculateBaselineAssessmentScore(
+            {
+              psychological: session.finalResult.psychological,
+              biological: session.finalResult.biological,
+              social: session.finalResult.social,
+            },
+            country
+          );
+          sessions[index].finalResult = finalResult;
+          return finalResult;
+        }
+      })
+    );
+
+    return sessions;
   } catch (err) {
     throw err;
   }
@@ -804,7 +775,7 @@ export const createScreeningSession = async ({
         status: session.status,
         createdAt: session.created_at,
         updatedAt: session.updated_at,
-        totalQuestions: 27,
+        totalQuestions: QUESTIONS_COUNT,
         completionPercentage: 0,
       };
     });

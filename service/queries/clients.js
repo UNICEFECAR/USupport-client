@@ -494,23 +494,23 @@ export const updateScreeningSessionStatusQuery = async ({
   poolCountry,
   screeningSessionId,
   status,
-  psychologicalProfile,
-  biologicalProfile,
-  socialProfile,
+  psychologicalScore,
+  biologicalScore,
+  socialScore,
 }) => {
   return await getDBPool("clinicalDb", poolCountry).query(
     `
       UPDATE screening_session
-      SET status = $1, updated_at = NOW(), psychological_profile = $3, biological_profile = $4, social_profile = $5
+      SET status = $1, updated_at = NOW(), psychological_score = $3, biological_score = $4, social_score = $5
       WHERE screening_session_id = $2
       RETURNING screening_session_id, status
     `,
     [
       status,
       screeningSessionId,
-      psychologicalProfile,
-      biologicalProfile,
-      socialProfile,
+      psychologicalScore,
+      biologicalScore,
+      socialScore,
     ]
   );
 };
@@ -543,5 +543,14 @@ export const addSOSCenterClickQuery = async ({
       RETURNING id;
     `,
     [sosCenterId, isMain, clientDetailId || null, platform]
+  );
+};
+
+export const getBaselineAssessmentThresholdsQuery = async (country) => {
+  return await getDBPool("clinicalDb", country).query(
+    `
+      SELECT factor, below, above
+      FROM baseline_assesment_threshold
+    `
   );
 };
