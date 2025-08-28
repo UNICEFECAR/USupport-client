@@ -546,6 +546,22 @@ export const addSOSCenterClickQuery = async ({
   );
 };
 
+export const getLatestBaselineAssessmentQuery = async ({
+  poolCountry,
+  clientDetailId,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      SELECT *
+      FROM screening_session ss
+      WHERE ss.client_detail_id = $1
+      ORDER BY ss.created_at DESC
+      LIMIT 1
+    `,
+    [clientDetailId]
+  );
+};
+
 export const getBaselineAssessmentThresholdsQuery = async (country) => {
   return await getDBPool("clinicalDb", country).query(
     `

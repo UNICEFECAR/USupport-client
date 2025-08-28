@@ -31,6 +31,7 @@ import {
   updateScreeningSessionStatusQuery,
   updateClientHasCheckedBaselineAssessmentQuery,
   addSOSCenterClickQuery,
+  getLatestBaselineAssessmentQuery,
 } from "#queries/clients";
 
 import {
@@ -804,6 +805,64 @@ export const updateClientHasCheckedBaselineAssessment = async ({
       console.log(err);
       throw clientNotFound(language);
     });
+};
+
+export const getLatestBaselineAssessment = async ({
+  country,
+  language,
+  clientDetailId,
+}) => {
+  try {
+    if (country !== "RO") {
+      throw countryNotSupported(language);
+    }
+
+    const session = await getLatestBaselineAssessmentQuery({
+      poolCountry: country,
+      clientDetailId,
+    }).then((res) => {
+      if (res.rowCount === 0) {
+        return null;
+      }
+
+      const sessionData = res.rows[0];
+      return {
+        screeningSessionId: sessionData.screening_session_id,
+        clientDetailId: sessionData.client_detail_id,
+        startedAt: sessionData.started_at,
+        completedAt: sessionData.completed_at,
+        currentPosition: sessionData.current_position,
+        status: sessionData.status,
+        createdAt: sessionData.created_at,
+        updatedAt: sessionData.updated_at,
+        totalQuestions: QUESTIONS_COUNT,
+        completionPercentage: Math.round(
+          (parseInt(sessionData.current_position - 1) / QUESTIONS_COUNT) * 100
+        ),
+        finalResult: {
+          psychological: sessionData.psychological_score,
+          biological: sessionData.biological_score,
+          social: sessionData.social_score,
+        },
+      };
+    });
+
+    if (session && session.status === "completed") {
+      const finalResult = await calculateBaselineAssessmentScore(
+        {
+          psychological: session.finalResult.psychological,
+          biological: session.finalResult.biological,
+          social: session.finalResult.social,
+        },
+        country
+      );
+      session.finalResult = finalResult;
+    }
+
+    return session;
+  } catch (err) {
+    throw err;
+  }
 };
 
 export const addSOSCenterClick = async ({

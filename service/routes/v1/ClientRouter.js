@@ -28,6 +28,7 @@ import {
   createScreeningSessionSchema,
   updateClientHasCheckedBaselineAssessmentSchema,
   addSOSCenterClickSchema,
+  getLatestBaselineAssessmentSchema,
 } from "#schemas/clientSchemas";
 
 import {
@@ -52,6 +53,7 @@ import {
   createScreeningSession,
   updateClientHasCheckedBaselineAssessment,
   addSOSCenterClick,
+  getLatestBaselineAssessment,
 } from "#controllers/clients";
 
 const router = express.Router();
@@ -177,6 +179,24 @@ router.post(
       .catch(next);
   }
 );
+
+router.get("/screening/latest", populateUser, async (req, res, next) => {
+  /**
+   * #route   GET /client/v1/client/screening/latest
+   * #desc    Get the latest completed baseline assessment for the current client
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+  const clientDetailId = req.user.client_detail_id;
+
+  return await getLatestBaselineAssessmentSchema
+    .noUnknown(true)
+    .strict()
+    .validate({ country, language, clientDetailId })
+    .then(getLatestBaselineAssessment)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
 
 router.get("/", populateClient, async (req, res) => {
   /**

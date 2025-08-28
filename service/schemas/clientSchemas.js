@@ -198,6 +198,7 @@ export const addScreeningAnswerSchema = yup.object().shape({
   language: yup.string().required(),
   questionId: yup.string().uuid().required(),
   answerValue: yup.number().integer().min(1).max(5).required(),
+  currentPosition: yup.number().integer().min(1).max(27).required(),
   screeningSessionId: yup.string().uuid().nullable(),
 });
 
@@ -233,6 +234,12 @@ export const updateClientHasCheckedBaselineAssessmentSchema = yup
     language: yup.string().required(),
     hasCheckedBaselineAssessment: yup.boolean().required(),
   });
+export const getLatestBaselineAssessmentSchema = yup.object().shape({
+  clientDetailId: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+});
+
 export const addSOSCenterClickSchema = yup.object().shape({
   country: yup.string().required(),
   language: yup.string().required(),
