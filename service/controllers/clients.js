@@ -32,6 +32,7 @@ import {
   updateClientHasCheckedBaselineAssessmentQuery,
   addSOSCenterClickQuery,
   getLatestBaselineAssessmentQuery,
+  anonimizeClientScreeningSessionsQuery,
 } from "#queries/clients";
 
 import {
@@ -761,6 +762,17 @@ export const createScreeningSession = async ({
     if (country !== "RO") {
       throw countryNotSupported(language);
     }
+
+    // When a new session is created, we need to anonimize the previous sessions
+    await anonimizeClientScreeningSessionsQuery({
+      country,
+      clientDetailId,
+    }).catch((err) => {
+      console.log(
+        `Error "${err}" anonimizing client screening sessions: `,
+        clientDetailId
+      );
+    });
 
     return await createScreeningSessionQuery({
       poolCountry: country,
