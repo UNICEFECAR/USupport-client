@@ -26,7 +26,7 @@ export const getClientByUserID = async (poolCountry, user_id) =>
 
     ), clientData AS (
 
-        SELECT client_detail."client_detail_id", "name", surname, nickname, email, image, sex, year_of_birth, urban_rural, data_processing, access_token, push_notification_tokens
+        SELECT client_detail."client_detail_id", "name", surname, nickname, email, image, sex, year_of_birth, urban_rural, data_processing, access_token, push_notification_tokens, has_checked_baseline_assessment
         FROM client_detail
           JOIN userData ON userData.client_detail_id = client_detail.client_detail_id
         ORDER BY client_detail.created_at DESC
@@ -568,5 +568,19 @@ export const getBaselineAssessmentThresholdsQuery = async (country) => {
       SELECT factor, below, above
       FROM baseline_assesment_threshold
     `
+  );
+};
+
+export const anonimizeClientScreeningSessionsQuery = async ({
+  country,
+  clientDetailId,
+}) => {
+  return await getDBPool("clinicalDb", country).query(
+    `
+      UPDATE screening_session
+      SET client_detail_id = NULL
+      WHERE client_detail_id = $1
+    `,
+    [clientDetailId]
   );
 };
