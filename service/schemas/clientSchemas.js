@@ -192,6 +192,56 @@ export const getCategoryInteractionsSchema = yup.object().shape({
   country: yup.string().required(),
 });
 
+export const addBaselineAssessmentAnswerSchema = yup.object().shape({
+  clientDetailId: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+  questionId: yup.string().uuid().required(),
+  answerValue: yup.number().integer().min(1).max(5).required(),
+  currentPosition: yup.number().integer().min(1).max(27).required(),
+  baselineAssessmentId: yup.string().uuid().nullable(),
+});
+
+export const getAllBaselineAssessmentQuestionsSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+});
+
+export const getClientBaselineAssessmentsSchema = yup.object().shape({
+  clientDetailId: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+});
+
+export const getClientAnswersForBaselineAssessmentByIdSchema = yup
+  .object()
+  .shape({
+    clientDetailId: yup.string().uuid().required(),
+    country: yup.string().required(),
+    language: yup.string().required(),
+    baselineAssessmentId: yup.string().uuid().required(),
+  });
+
+export const createBaselineAssessmentSchema = yup.object().shape({
+  clientDetailId: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+});
+
+export const updateClientHasCheckedBaselineAssessmentSchema = yup
+  .object()
+  .shape({
+    clientDetailId: yup.string().uuid().required(),
+    country: yup.string().required(),
+    language: yup.string().required(),
+    hasCheckedBaselineAssessment: yup.boolean().required(),
+  });
+export const getLatestBaselineAssessmentSchema = yup.object().shape({
+  clientDetailId: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+});
+
 export const addSOSCenterClickSchema = yup.object().shape({
   country: yup.string().required(),
   language: yup.string().required(),

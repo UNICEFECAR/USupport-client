@@ -79,3 +79,11 @@ export const organizationNotFound = (language) => {
   error.status = 404;
   return error;
 };
+
+export const countryNotSupported = (language) => {
+  const error = new Error();
+  error.message = t("country_not_supported_error", language);
+  error.name = "COUNTRY NOT SUPPORTED";
+  error.status = 400;
+  return error;
+};
