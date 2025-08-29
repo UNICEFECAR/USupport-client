@@ -372,127 +372,145 @@ export const addPlatformSuggestionQuery = async ({
   );
 };
 
-export const getOrCreateScreeningSessionQuery = async ({
+export const getOrCreateBaselineAssessmentQuery = async ({
   poolCountry,
   clientDetailId,
-  screeningSessionId,
+  baselineAssessmentId,
 }) => {
-  if (screeningSessionId) {
-    // Return existing session
+  if (baselineAssessmentId) {
+    // Return existing assessment
     return await getDBPool("clinicalDb", poolCountry).query(
       `
-        SELECT screening_session_id, client_detail_id, started_at, completed_at, current_position, status
-        FROM screening_session
-        WHERE screening_session_id = $1 AND client_detail_id = $2
+        SELECT baseline_assessment_id, client_detail_id, started_at, completed_at, current_position, status
+        FROM baseline_assessment_session
+        WHERE baseline_assessment_id = $1 AND client_detail_id = $2
         LIMIT 1
       `,
-      [screeningSessionId, clientDetailId]
+      [baselineAssessmentId, clientDetailId]
     );
   } else {
-    // Create new session
+    // Create new assessment
     return await getDBPool("clinicalDb", poolCountry).query(
       `
-        INSERT INTO screening_session (client_detail_id)
+        INSERT INTO baseline_assessment_session (client_detail_id)
         VALUES ($1)
-        RETURNING screening_session_id, client_detail_id, started_at, completed_at, current_position, status
+        RETURNING baseline_assessment_id, client_detail_id, started_at, completed_at, current_position, status
       `,
       [clientDetailId]
     );
   }
 };
 
-export const addScreeningAnswerQuery = async ({
+export const addBaselineAssessmentAnswerQuery = async ({
   poolCountry,
-  screeningSessionId,
+  baselineAssessmentId,
   questionId,
   answerValue,
 }) => {
   return await getDBPool("clinicalDb", poolCountry).query(
     `
-      INSERT INTO screening_answer (screening_session_id, question_id, answer_value)
+      INSERT INTO baseline_assessment_answer (baseline_assessment_id, question_id, answer_value)
       VALUES ($1, $2, $3)
-      ON CONFLICT (screening_session_id, question_id)
+      ON CONFLICT (baseline_assessment_id, question_id)
       DO UPDATE SET 
         answer_value = EXCLUDED.answer_value,
         answered_at = NOW()
-      RETURNING answer_id, screening_session_id, question_id, answer_value, answered_at
+      RETURNING answer_id, baseline_assessment_id, question_id, answer_value, answered_at
     `,
-    [screeningSessionId, questionId, answerValue]
+    [baselineAssessmentId, questionId, answerValue]
   );
 };
 
-export const updateScreeningSessionPositionQuery = async ({
+export const updateBaselineAssessmentPositionQuery = async ({
   poolCountry,
-  screeningSessionId,
+  baselineAssessmentId,
   position,
 }) => {
   return await getDBPool("clinicalDb", poolCountry).query(
     `
-      UPDATE screening_session
+      UPDATE baseline_assessment_session
       SET current_position = $1, updated_at = NOW()
-      WHERE screening_session_id = $2
-      RETURNING screening_session_id, current_position
+      WHERE baseline_assessment_id = $2
+      RETURNING baseline_assessment_id, current_position
     `,
-    [position, screeningSessionId]
+    [position, baselineAssessmentId]
   );
 };
 
-export const getAllScreeningQuestionsQuery = async ({ poolCountry }) => {
+export const getAllBaselineAssessmentQuestionsQuery = async ({
+  poolCountry,
+}) => {
   return await getDBPool("clinicalDb", poolCountry).query(
     `
       SELECT question_id, position, question_text, dimension, is_critical, created_at
-      FROM screening_question
+      FROM baseline_assessment_question
       ORDER BY position ASC
     `
   );
 };
 
-export const getClientScreeningSessionsQuery = async ({
+export const getClientBaselineAssessmentsQuery = async ({
   poolCountry,
   clientDetailId,
 }) => {
   return await getDBPool("clinicalDb", poolCountry).query(
     `
-      SELECT *
-      FROM screening_session ss
-      WHERE ss.client_detail_id = $1
-      ORDER BY ss.created_at DESC
+      SELECT 
+        baseline_assessment_id,
+        client_detail_id,
+        started_at,
+        completed_at,
+        current_position,
+        status,
+        created_at,
+        updated_at,
+        psychological_score,
+        biological_score,
+        social_score
+      FROM baseline_assessment_session bas
+      WHERE bas.client_detail_id = $1
+      ORDER BY bas.created_at DESC
     `,
     [clientDetailId]
   );
 };
 
-export const getClientAnswersForSessionByIdQuery = async ({
+export const getClientAnswersForBaselineAssessmentByIdQuery = async ({
   poolCountry,
-  screeningSessionId,
+  baselineAssessmentId,
 }) => {
   return await getDBPool("clinicalDb", poolCountry).query(
     `
-      SELECT *
-      FROM screening_answer
-      WHERE screening_session_id = $1
+      SELECT 
+        answer_id,
+        baseline_assessment_id,
+        question_id,
+        answer_value,
+        answered_at
+      FROM baseline_assessment_answer
+      WHERE baseline_assessment_id = $1
     `,
-    [screeningSessionId]
+    [baselineAssessmentId]
   );
 };
 
-export const createScreeningSessionQuery = async ({
+export const createBaselineAssessmentQuery = async ({
   poolCountry,
   clientDetailId,
 }) => {
   return await getDBPool("clinicalDb", poolCountry).query(
     `
-      INSERT INTO screening_session (client_detail_id)
+      INSERT INTO baseline_assessment_session (client_detail_id)
       VALUES ($1)
-      RETURNING screening_session_id, client_detail_id, started_at, completed_at, current_position, status, created_at, updated_at
+      RETURNING baseline_assessment_id, client_detail_id, started_at, completed_at, current_position, status, created_at, updated_at
     `,
     [clientDetailId]
   );
 };
 
-export const updateScreeningSessionStatusQuery = async ({
+export const updateBaselineAssessmentStatusQuery = async ({
   poolCountry,
-  screeningSessionId,
+  baselineAssessmentId,
   status,
   psychologicalScore,
   biologicalScore,
@@ -500,14 +518,14 @@ export const updateScreeningSessionStatusQuery = async ({
 }) => {
   return await getDBPool("clinicalDb", poolCountry).query(
     `
-      UPDATE screening_session
+      UPDATE baseline_assessment_session
       SET status = $1, updated_at = NOW(), psychological_score = $3, biological_score = $4, social_score = $5
-      WHERE screening_session_id = $2
-      RETURNING screening_session_id, status
+      WHERE baseline_assessment_id = $2
+      RETURNING baseline_assessment_id, status
     `,
     [
       status,
-      screeningSessionId,
+      baselineAssessmentId,
       psychologicalScore,
       biologicalScore,
       socialScore,
@@ -552,10 +570,21 @@ export const getLatestBaselineAssessmentQuery = async ({
 }) => {
   return await getDBPool("clinicalDb", poolCountry).query(
     `
-      SELECT *
-      FROM screening_session ss
-      WHERE ss.client_detail_id = $1
-      ORDER BY ss.created_at DESC
+      SELECT 
+        baseline_assessment_id,
+        client_detail_id,
+        started_at,
+        completed_at,
+        current_position,
+        status,
+        created_at,
+        updated_at,
+        psychological_score,
+        biological_score,
+        social_score
+      FROM baseline_assessment_session bas
+      WHERE bas.client_detail_id = $1
+      ORDER BY bas.created_at DESC
       LIMIT 1
     `,
     [clientDetailId]
@@ -566,18 +595,18 @@ export const getBaselineAssessmentThresholdsQuery = async (country) => {
   return await getDBPool("clinicalDb", country).query(
     `
       SELECT factor, below, above
-      FROM baseline_assesment_threshold
+      FROM baseline_assessment_threshold
     `
   );
 };
 
-export const anonimizeClientScreeningSessionsQuery = async ({
+export const anonimizeClientBaselineAssessmentsQuery = async ({
   country,
   clientDetailId,
 }) => {
   return await getDBPool("clinicalDb", country).query(
     `
-      UPDATE screening_session
+      UPDATE baseline_assessment_session
       SET client_detail_id = NULL
       WHERE client_detail_id = $1
     `,

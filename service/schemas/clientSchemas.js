@@ -192,35 +192,37 @@ export const getCategoryInteractionsSchema = yup.object().shape({
   country: yup.string().required(),
 });
 
-export const addScreeningAnswerSchema = yup.object().shape({
+export const addBaselineAssessmentAnswerSchema = yup.object().shape({
   clientDetailId: yup.string().uuid().required(),
   country: yup.string().required(),
   language: yup.string().required(),
   questionId: yup.string().uuid().required(),
   answerValue: yup.number().integer().min(1).max(5).required(),
   currentPosition: yup.number().integer().min(1).max(27).required(),
-  screeningSessionId: yup.string().uuid().nullable(),
+  baselineAssessmentId: yup.string().uuid().nullable(),
 });
 
-export const getAllScreeningQuestionsSchema = yup.object().shape({
+export const getAllBaselineAssessmentQuestionsSchema = yup.object().shape({
   country: yup.string().required(),
   language: yup.string().required(),
 });
 
-export const getClientScreeningSessionsSchema = yup.object().shape({
+export const getClientBaselineAssessmentsSchema = yup.object().shape({
   clientDetailId: yup.string().uuid().required(),
   country: yup.string().required(),
   language: yup.string().required(),
 });
 
-export const getClientAnswersForSessionByIdSchema = yup.object().shape({
-  clientDetailId: yup.string().uuid().required(),
-  country: yup.string().required(),
-  language: yup.string().required(),
-  screeningSessionId: yup.string().uuid().required(),
-});
+export const getClientAnswersForBaselineAssessmentByIdSchema = yup
+  .object()
+  .shape({
+    clientDetailId: yup.string().uuid().required(),
+    country: yup.string().required(),
+    language: yup.string().required(),
+    baselineAssessmentId: yup.string().uuid().required(),
+  });
 
-export const createScreeningSessionSchema = yup.object().shape({
+export const createBaselineAssessmentSchema = yup.object().shape({
   clientDetailId: yup.string().uuid().required(),
   country: yup.string().required(),
   language: yup.string().required(),

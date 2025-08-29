@@ -21,18 +21,18 @@ import {
   addClientCategoryInteractionQuery,
   getCategoryInteractionsQuery,
   addPlatformSuggestionQuery,
-  getOrCreateScreeningSessionQuery,
-  addScreeningAnswerQuery,
-  updateScreeningSessionPositionQuery,
-  getAllScreeningQuestionsQuery,
-  getClientScreeningSessionsQuery,
-  getClientAnswersForSessionByIdQuery,
-  createScreeningSessionQuery,
-  updateScreeningSessionStatusQuery,
+  getOrCreateBaselineAssessmentQuery,
+  addBaselineAssessmentAnswerQuery,
+  updateBaselineAssessmentPositionQuery,
+  getAllBaselineAssessmentQuestionsQuery,
+  getClientBaselineAssessmentsQuery,
+  getClientAnswersForBaselineAssessmentByIdQuery,
+  createBaselineAssessmentQuery,
+  updateBaselineAssessmentStatusQuery,
   updateClientHasCheckedBaselineAssessmentQuery,
   addSOSCenterClickQuery,
   getLatestBaselineAssessmentQuery,
-  anonimizeClientScreeningSessionsQuery,
+  anonimizeClientBaselineAssessmentsQuery,
 } from "#queries/clients";
 
 import {
@@ -503,17 +503,17 @@ export const addPlatformSuggestion = async ({
     });
 };
 
-export const addScreeningAnswer = async ({
+export const addBaselineAssessmentAnswer = async ({
   country,
   language,
   clientDetailId,
   questionId,
   answerValue,
-  screeningSessionId,
+  baselineAssessmentId,
   currentPosition,
 }) => {
   try {
-    const questionsCacheKey = `screening_questions`;
+    const questionsCacheKey = `baseline_assessment_questions`;
     const questionsCacheItem = await getCacheItem(questionsCacheKey).catch(
       (err) => {
         console.log("Error getting item from cache: ", err);
@@ -525,10 +525,10 @@ export const addScreeningAnswer = async ({
     );
     const currentQuestionPosition = currentQuestion.position;
 
-    const session = await getOrCreateScreeningSessionQuery({
+    const assessment = await getOrCreateBaselineAssessmentQuery({
       poolCountry: country,
       clientDetailId,
-      screeningSessionId,
+      baselineAssessmentId,
     })
       .then((res) => {
         return res.rows[0];
@@ -538,16 +538,16 @@ export const addScreeningAnswer = async ({
       });
 
     // Add the answer
-    const answerResult = await addScreeningAnswerQuery({
+    const answerResult = await addBaselineAssessmentAnswerQuery({
       poolCountry: country,
-      screeningSessionId,
+      baselineAssessmentId,
       questionId,
       answerValue,
     });
 
     const answer = answerResult.rows[0];
 
-    // const currentPosition = session.current_position;
+    // const currentPosition = assessment.current_position;
 
     const newPosition =
       currentQuestionPosition > currentPosition
@@ -558,29 +558,30 @@ export const addScreeningAnswer = async ({
 
     // If we are on the last question, the new position will become 28, so we don't need to update the position
     if (newPosition !== 28) {
-      // Update session position if this question position is higher than current
+      // Update assessment position if this question position is higher than current
       // Note: We'd need to get the question position, but for simplicity, we'll increment current position
-      await updateScreeningSessionPositionQuery({
+      await updateBaselineAssessmentPositionQuery({
         poolCountry: country,
-        screeningSessionId: session.screening_session_id,
+        baselineAssessmentId: assessment.baseline_assessment_id,
         position:
           currentQuestionPosition > currentPosition
             ? currentQuestionPosition
             : currentPosition + 1,
       });
     } else {
-      // Get all user answers for the session, to calculate the score
-      const clientAnswers = await getClientAnswersForSessionByIdQuery({
-        poolCountry: country,
-        clientDetailId,
-        screeningSessionId: session.screening_session_id,
-      }).then((res) => {
-        if (res.rowCount === 0) {
-          return [];
-        } else {
-          return res.rows;
-        }
-      });
+      // Get all user answers for the assessment, to calculate the score
+      const clientAnswers =
+        await getClientAnswersForBaselineAssessmentByIdQuery({
+          poolCountry: country,
+          clientDetailId,
+          baselineAssessmentId: assessment.baseline_assessment_id,
+        }).then((res) => {
+          if (res.rowCount === 0) {
+            return [];
+          } else {
+            return res.rows;
+          }
+        });
 
       const {
         psychological: psychologicalScore,
@@ -607,9 +608,9 @@ export const addScreeningAnswer = async ({
         country
       );
 
-      await updateScreeningSessionStatusQuery({
+      await updateBaselineAssessmentStatusQuery({
         poolCountry: country,
-        screeningSessionId: session.screening_session_id,
+        baselineAssessmentId: assessment.baseline_assessment_id,
         status: "completed",
         psychologicalScore,
         biologicalScore,
@@ -619,7 +620,7 @@ export const addScreeningAnswer = async ({
 
     return {
       success: true,
-      screeningSessionId: session.screening_session_id,
+      baselineAssessmentId: assessment.baseline_assessment_id,
       answerId: answer.answer_id,
       answeredAt: answer.answered_at,
       finalResult,
@@ -629,13 +630,16 @@ export const addScreeningAnswer = async ({
   }
 };
 
-export const getAllScreeningQuestions = async ({ country, language }) => {
+export const getAllBaselineAssessmentQuestions = async ({
+  country,
+  language,
+}) => {
   try {
     if (country !== "RO") {
       throw countryNotSupported(language);
     }
 
-    const cacheKey = "screening_questions";
+    const cacheKey = "baseline_assessment_questions";
     const cacheItem = await getCacheItem(cacheKey).catch((err) => {
       console.log("Error getting item from cache: ", err);
     });
@@ -644,7 +648,7 @@ export const getAllScreeningQuestions = async ({ country, language }) => {
       return cacheItem;
     }
 
-    return await getAllScreeningQuestionsQuery({
+    return await getAllBaselineAssessmentQuestionsQuery({
       poolCountry: country,
     }).then(async (res) => {
       const questions = res.rows.map((question) => ({
@@ -669,7 +673,7 @@ export const getAllScreeningQuestions = async ({ country, language }) => {
   }
 };
 
-export const getClientScreeningSessions = async ({
+export const getClientBaselineAssessments = async ({
   country,
   language,
   clientDetailId,
@@ -679,66 +683,66 @@ export const getClientScreeningSessions = async ({
       throw countryNotSupported(language);
     }
 
-    const sessions = await getClientScreeningSessionsQuery({
+    const assessments = await getClientBaselineAssessmentsQuery({
       poolCountry: country,
       clientDetailId,
     }).then((res) => {
-      const sessions = res.rows.map((session) => ({
-        screeningSessionId: session.screening_session_id,
-        clientDetailId: session.client_detail_id,
-        startedAt: session.started_at,
-        completedAt: session.completed_at,
-        currentPosition: session.current_position,
-        status: session.status,
-        createdAt: session.created_at,
-        updatedAt: session.updated_at,
+      const assessments = res.rows.map((assessment) => ({
+        baselineAssessmentId: assessment.baseline_assessment_id,
+        clientDetailId: assessment.client_detail_id,
+        startedAt: assessment.started_at,
+        completedAt: assessment.completed_at,
+        currentPosition: assessment.current_position,
+        status: assessment.status,
+        createdAt: assessment.created_at,
+        updatedAt: assessment.updated_at,
         totalQuestions: QUESTIONS_COUNT,
         completionPercentage: Math.round(
-          (parseInt(session.current_position - 1) / QUESTIONS_COUNT) * 100
+          (parseInt(assessment.current_position - 1) / QUESTIONS_COUNT) * 100
         ),
         finalResult: {
-          psychological: session.psychological_score,
-          biological: session.biological_score,
-          social: session.social_score,
+          psychological: assessment.psychological_score,
+          biological: assessment.biological_score,
+          social: assessment.social_score,
         },
       }));
-      return sessions;
+      return assessments;
     });
 
-    // Calculate the final result for each session
+    // Calculate the final result for each assessment
     await Promise.all(
-      sessions.map(async (session, index) => {
-        if (session.status === "completed") {
+      assessments.map(async (assessment, index) => {
+        if (assessment.status === "completed") {
           const finalResult = await calculateBaselineAssessmentScore(
             {
-              psychological: session.finalResult.psychological,
-              biological: session.finalResult.biological,
-              social: session.finalResult.social,
+              psychological: assessment.finalResult.psychological,
+              biological: assessment.finalResult.biological,
+              social: assessment.finalResult.social,
             },
             country
           );
-          sessions[index].finalResult = finalResult;
+          assessments[index].finalResult = finalResult;
           return finalResult;
         }
       })
     );
 
-    return sessions;
+    return assessments;
   } catch (err) {
     throw err;
   }
 };
 
-export const getClientAnswersForSessionById = async ({
+export const getClientAnswersForBaselineAssessmentById = async ({
   country,
   language,
   clientDetailId,
-  screeningSessionId,
+  baselineAssessmentId,
 }) => {
-  return await getClientAnswersForSessionByIdQuery({
+  return await getClientAnswersForBaselineAssessmentByIdQuery({
     poolCountry: country,
     clientDetailId,
-    screeningSessionId,
+    baselineAssessmentId,
   }).then((res) => {
     if (res.rowCount === 0) {
       return [];
@@ -753,7 +757,7 @@ export const getClientAnswersForSessionById = async ({
   });
 };
 
-export const createScreeningSession = async ({
+export const createBaselineAssessment = async ({
   country,
   language,
   clientDetailId,
@@ -763,31 +767,31 @@ export const createScreeningSession = async ({
       throw countryNotSupported(language);
     }
 
-    // When a new session is created, we need to anonimize the previous sessions
-    await anonimizeClientScreeningSessionsQuery({
+    // When a new assessment is created, we need to anonimize the previous assessments
+    await anonimizeClientBaselineAssessmentsQuery({
       country,
       clientDetailId,
     }).catch((err) => {
       console.log(
-        `Error "${err}" anonimizing client screening sessions: `,
+        `Error "${err}" anonimizing client baseline assessments: `,
         clientDetailId
       );
     });
 
-    return await createScreeningSessionQuery({
+    return await createBaselineAssessmentQuery({
       poolCountry: country,
       clientDetailId,
     }).then((res) => {
-      const session = res.rows[0];
+      const assessment = res.rows[0];
       return {
-        screeningSessionId: session.screening_session_id,
-        clientDetailId: session.client_detail_id,
-        startedAt: session.started_at,
-        completedAt: session.completed_at,
-        currentPosition: session.current_position,
-        status: session.status,
-        createdAt: session.created_at,
-        updatedAt: session.updated_at,
+        baselineAssessmentId: assessment.baseline_assessment_id,
+        clientDetailId: assessment.client_detail_id,
+        startedAt: assessment.started_at,
+        completedAt: assessment.completed_at,
+        currentPosition: assessment.current_position,
+        status: assessment.status,
+        createdAt: assessment.created_at,
+        updatedAt: assessment.updated_at,
         totalQuestions: QUESTIONS_COUNT,
         completionPercentage: 0,
       };
@@ -829,49 +833,50 @@ export const getLatestBaselineAssessment = async ({
       throw countryNotSupported(language);
     }
 
-    const session = await getLatestBaselineAssessmentQuery({
+    const assessment = await getLatestBaselineAssessmentQuery({
       poolCountry: country,
       clientDetailId,
     }).then((res) => {
       if (res.rowCount === 0) {
-        return null;
+        return {};
       }
 
-      const sessionData = res.rows[0];
+      const assessmentData = res.rows[0];
       return {
-        screeningSessionId: sessionData.screening_session_id,
-        clientDetailId: sessionData.client_detail_id,
-        startedAt: sessionData.started_at,
-        completedAt: sessionData.completed_at,
-        currentPosition: sessionData.current_position,
-        status: sessionData.status,
-        createdAt: sessionData.created_at,
-        updatedAt: sessionData.updated_at,
+        baselineAssessmentId: assessmentData.baseline_assessment_id,
+        clientDetailId: assessmentData.client_detail_id,
+        startedAt: assessmentData.started_at,
+        completedAt: assessmentData.completed_at,
+        currentPosition: assessmentData.current_position,
+        status: assessmentData.status,
+        createdAt: assessmentData.created_at,
+        updatedAt: assessmentData.updated_at,
         totalQuestions: QUESTIONS_COUNT,
         completionPercentage: Math.round(
-          (parseInt(sessionData.current_position - 1) / QUESTIONS_COUNT) * 100
+          (parseInt(assessmentData.current_position - 1) / QUESTIONS_COUNT) *
+            100
         ),
         finalResult: {
-          psychological: sessionData.psychological_score,
-          biological: sessionData.biological_score,
-          social: sessionData.social_score,
+          psychological: assessmentData.psychological_score,
+          biological: assessmentData.biological_score,
+          social: assessmentData.social_score,
         },
       };
     });
 
-    if (session && session.status === "completed") {
+    if (assessment && assessment.status === "completed") {
       const finalResult = await calculateBaselineAssessmentScore(
         {
-          psychological: session.finalResult.psychological,
-          biological: session.finalResult.biological,
-          social: session.finalResult.social,
+          psychological: assessment.finalResult.psychological,
+          biological: assessment.finalResult.biological,
+          social: assessment.finalResult.social,
         },
         country
       );
-      session.finalResult = finalResult;
+      assessment.finalResult = finalResult;
     }
 
-    return session;
+    return assessment;
   } catch (err) {
     throw err;
   }

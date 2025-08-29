@@ -21,11 +21,11 @@ import {
   addClientCategoryInteractionSchema,
   getCategoryInteractionsSchema,
   addPlatformSuggestionSchema,
-  addScreeningAnswerSchema,
-  getAllScreeningQuestionsSchema,
-  getClientScreeningSessionsSchema,
-  getClientAnswersForSessionByIdSchema,
-  createScreeningSessionSchema,
+  addBaselineAssessmentAnswerSchema,
+  getAllBaselineAssessmentQuestionsSchema,
+  getClientBaselineAssessmentsSchema,
+  getClientAnswersForBaselineAssessmentByIdSchema,
+  createBaselineAssessmentSchema,
   updateClientHasCheckedBaselineAssessmentSchema,
   addSOSCenterClickSchema,
   getLatestBaselineAssessmentSchema,
@@ -46,11 +46,11 @@ import {
   addClientCategoryInteraction,
   getCategoryInteractions,
   addPlatformSuggestion,
-  addScreeningAnswer,
-  getAllScreeningQuestions,
-  getClientScreeningSessions,
-  getClientAnswersForSessionById,
-  createScreeningSession,
+  addBaselineAssessmentAnswer,
+  getAllBaselineAssessmentQuestions,
+  getClientBaselineAssessments,
+  getClientAnswersForBaselineAssessmentById,
+  createBaselineAssessment,
   updateClientHasCheckedBaselineAssessment,
   addSOSCenterClick,
   getLatestBaselineAssessment,
@@ -80,123 +80,139 @@ router.post(
   }
 );
 
-router.post("/screening/add-answer", populateUser, async (req, res, next) => {
-  /**
-   * #route   POST /client/v1/client/screening/add-answer
-   * #desc    Add screening answer
-   */
-  const country = req.header("x-country-alpha-2");
-  const language = req.header("x-language-alpha-2");
-  const clientDetailId = req.user.client_detail_id;
-  const payload = req.body;
-
-  return await addScreeningAnswerSchema
-    .noUnknown(true)
-    .strict()
-    .validate({ country, language, clientDetailId, ...payload })
-    .then(addScreeningAnswer)
-    .then((result) => res.status(200).send(result))
-    .catch(next);
-});
-
-router.get("/screening/questions", async (req, res, next) => {
-  /**
-   * #route   GET /client/v1/client/screening/questions
-   * #desc    Get all screening questions sorted by position
-   */
-  const country = req.header("x-country-alpha-2");
-  const language = req.header("x-language-alpha-2");
-
-  return await getAllScreeningQuestionsSchema
-    .noUnknown(true)
-    .strict()
-    .validate({ country, language })
-    .then(getAllScreeningQuestions)
-    .then((result) => res.status(200).send(result))
-    .catch(next);
-});
-
-router.get("/screening/sessions", populateUser, async (req, res, next) => {
-  /**
-   * #route   GET /client/v1/client/screening/sessions
-   * #desc    Get all screening sessions overview for the current client (without detailed answers)
-   */
-  const country = req.header("x-country-alpha-2");
-  const language = req.header("x-language-alpha-2");
-  const clientDetailId = req.user.client_detail_id;
-
-  return await getClientScreeningSessionsSchema
-    .noUnknown(true)
-    .strict()
-    .validate({ country, language, clientDetailId })
-    .then(getClientScreeningSessions)
-    .then((result) => res.status(200).send(result))
-    .catch(next);
-});
-
-router.get("/screening/answers", populateUser, async (req, res, next) => {
-  /**
-   * #route   GET /client/v1/client/screening/answers
-   * #desc    Get screening answers for a session
-   */
-  const country = req.header("x-country-alpha-2");
-  const language = req.header("x-language-alpha-2");
-  const clientDetailId = req.user.client_detail_id;
-  const { sessionId } = req.query;
-
-  return await getClientAnswersForSessionByIdSchema
-    .noUnknown(true)
-    .strict()
-    .validate({
-      country,
-      language,
-      clientDetailId,
-      screeningSessionId: sessionId,
-    })
-    .then(getClientAnswersForSessionById)
-    .then((result) => res.status(200).send(result))
-    .catch(next);
-});
-
 router.post(
-  "/screening/create-session",
+  "/baseline-assessment/add-answer",
   populateUser,
   async (req, res, next) => {
     /**
-     * #route   POST /client/v1/client/screening/create-session
-     * #desc    Create a new screening session
+     * #route   POST /client/v1/client/baseline-assessment/add-answer
+     * #desc    Add baseline assessment answer
      */
     const country = req.header("x-country-alpha-2");
     const language = req.header("x-language-alpha-2");
     const clientDetailId = req.user.client_detail_id;
+    const payload = req.body;
 
-    return await createScreeningSessionSchema
+    return await addBaselineAssessmentAnswerSchema
       .noUnknown(true)
       .strict()
-      .validate({ country, language, clientDetailId })
-      .then(createScreeningSession)
+      .validate({ country, language, clientDetailId, ...payload })
+      .then(addBaselineAssessmentAnswer)
       .then((result) => res.status(200).send(result))
       .catch(next);
   }
 );
 
-router.get("/screening/latest", populateUser, async (req, res, next) => {
+router.get("/baseline-assessment/questions", async (req, res, next) => {
   /**
-   * #route   GET /client/v1/client/screening/latest
-   * #desc    Get the latest completed baseline assessment for the current client
+   * #route   GET /client/v1/client/baseline-assessment/questions
+   * #desc    Get all baseline assessment questions sorted by position
    */
   const country = req.header("x-country-alpha-2");
   const language = req.header("x-language-alpha-2");
-  const clientDetailId = req.user.client_detail_id;
 
-  return await getLatestBaselineAssessmentSchema
+  return await getAllBaselineAssessmentQuestionsSchema
     .noUnknown(true)
     .strict()
-    .validate({ country, language, clientDetailId })
-    .then(getLatestBaselineAssessment)
+    .validate({ country, language })
+    .then(getAllBaselineAssessmentQuestions)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
+
+router.get(
+  "/baseline-assessment/assessments",
+  populateUser,
+  async (req, res, next) => {
+    /**
+     * #route   GET /client/v1/client/baseline-assessment/assessments
+     * #desc    Get all baseline assessments overview for the current client (without detailed answers)
+     */
+    const country = req.header("x-country-alpha-2");
+    const language = req.header("x-language-alpha-2");
+    const clientDetailId = req.user.client_detail_id;
+
+    return await getClientBaselineAssessmentsSchema
+      .noUnknown(true)
+      .strict()
+      .validate({ country, language, clientDetailId })
+      .then(getClientBaselineAssessments)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  }
+);
+
+router.get(
+  "/baseline-assessment/answers",
+  populateUser,
+  async (req, res, next) => {
+    /**
+     * #route   GET /client/v1/client/baseline-assessment/answers
+     * #desc    Get baseline assessment answers for an assessment
+     */
+    const country = req.header("x-country-alpha-2");
+    const language = req.header("x-language-alpha-2");
+    const clientDetailId = req.user.client_detail_id;
+    const { assessmentId } = req.query;
+
+    return await getClientAnswersForBaselineAssessmentByIdSchema
+      .noUnknown(true)
+      .strict()
+      .validate({
+        country,
+        language,
+        clientDetailId,
+        baselineAssessmentId: assessmentId,
+      })
+      .then(getClientAnswersForBaselineAssessmentById)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  }
+);
+
+router.post(
+  "/baseline-assessment/create-assessment",
+  populateUser,
+  async (req, res, next) => {
+    /**
+     * #route   POST /client/v1/client/baseline-assessment/create-assessment
+     * #desc    Create a new baseline assessment
+     */
+    const country = req.header("x-country-alpha-2");
+    const language = req.header("x-language-alpha-2");
+    const clientDetailId = req.user.client_detail_id;
+
+    return await createBaselineAssessmentSchema
+      .noUnknown(true)
+      .strict()
+      .validate({ country, language, clientDetailId })
+      .then(createBaselineAssessment)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  }
+);
+
+router.get(
+  "/baseline-assessment/latest",
+  populateUser,
+  async (req, res, next) => {
+    /**
+     * #route   GET /client/v1/client/baseline-assessment/latest
+     * #desc    Get the latest completed baseline assessment for the current client
+     */
+    const country = req.header("x-country-alpha-2");
+    const language = req.header("x-language-alpha-2");
+    const clientDetailId = req.user.client_detail_id;
+
+    return await getLatestBaselineAssessmentSchema
+      .noUnknown(true)
+      .strict()
+      .validate({ country, language, clientDetailId })
+      .then(getLatestBaselineAssessment)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  }
+);
 
 router.get("/", populateClient, async (req, res) => {
   /**
@@ -511,11 +527,11 @@ router.get("/category-interactions", populateUser, async (req, res, next) => {
 });
 
 router.patch(
-  "/has-checked-baseline-assesment",
+  "/has-checked-baseline-assessment",
   populateUser,
   async (req, res, next) => {
     /**
-     * #route   PATCH /client/v1/client/has-checked-baseline-assesment
+     * #route   PATCH /client/v1/client/has-checked-baseline-assessment
      * #desc    Update the client has checked baseline assessment
      */
     const country = req.header("x-country-alpha-2");
