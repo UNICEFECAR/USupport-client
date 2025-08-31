@@ -14,4 +14,5 @@ export default {
   consultation_not_found_error: "Консультация табылмады",
   en_error_occured: "Қателік пайда болды",
   organization_not_found_error: "Организация табылмады",
+  country_not_supported_error: "Бұл елде қызмет ету қолжетерлік емес",
 };

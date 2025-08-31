@@ -1,4 +1,7 @@
-import { getCliendDetailByUserIdQuery } from "#queries/clients";
+import {
+  getBaselineAssessmentThresholdsQuery,
+  getCliendDetailByUserIdQuery,
+} from "#queries/clients";
 import fetch from "node-fetch";
 
 const USER_LOCAL_HOST = "http://localhost:3010";
@@ -38,4 +41,53 @@ export const getClientDetailIdByUserId = async (
         throw err;
       });
   }
+};
+
+/**
+ *
+ * @param {Object} scores {psychological: number, biological: number, social: number}
+ * @param {string} country
+ * @returns {Object} {psychologicalProfile: string, biologicalProfile: string, socialProfile: string}
+ */
+export const calculateBaselineAssessmentScore = async (scores, country) => {
+  const {
+    psychological: psychologicalScore,
+    biological: biologicalScore,
+    social: socialScore,
+  } = scores;
+
+  const baselineAssessmentThresholds =
+    await getBaselineAssessmentThresholdsQuery(country)
+      .then((res) => {
+        return res.rows.reduce(
+          (acc, threshold) => {
+            acc[threshold.factor] = {
+              below: threshold.below,
+              above: threshold.above,
+            };
+            return acc;
+          },
+          { psychological: {}, biological: {}, social: {} }
+        );
+      })
+      .catch((err) => {
+        throw err;
+      });
+
+  const getScoreProfile = (score, factor) => {
+    const thresholds = baselineAssessmentThresholds[factor];
+    if (score < thresholds.below) {
+      return "low";
+    } else if (score >= thresholds.below && score <= thresholds.above) {
+      return "moderate";
+    } else if (score > thresholds.above) {
+      return "high";
+    }
+  };
+
+  const psychological = getScoreProfile(psychologicalScore, "psychological");
+  const biological = getScoreProfile(biologicalScore, "biological");
+  const social = getScoreProfile(socialScore, "social");
+
+  return { psychological, biological, social };
 };

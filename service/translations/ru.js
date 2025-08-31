@@ -15,4 +15,6 @@ export default {
   consultation_not_found_error: "Консультация не найдена",
   an_error_occured: "Произошла ошибка",
   organization_not_found_error: "Организация не найдена",
+  country_not_supported_error:
+    "Функциональность не поддерживается в этой стране",
 };

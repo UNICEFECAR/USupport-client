@@ -21,7 +21,18 @@ import {
   addClientCategoryInteractionQuery,
   getCategoryInteractionsQuery,
   addPlatformSuggestionQuery,
+  getOrCreateBaselineAssessmentQuery,
+  addBaselineAssessmentAnswerQuery,
+  updateBaselineAssessmentPositionQuery,
+  getAllBaselineAssessmentQuestionsQuery,
+  getClientBaselineAssessmentsQuery,
+  getClientAnswersForBaselineAssessmentByIdQuery,
+  createBaselineAssessmentQuery,
+  updateBaselineAssessmentStatusQuery,
+  updateClientHasCheckedBaselineAssessmentQuery,
   addSOSCenterClickQuery,
+  getLatestBaselineAssessmentQuery,
+  anonimizeClientBaselineAssessmentsQuery,
 } from "#queries/clients";
 
 import {
@@ -32,13 +43,17 @@ import {
   clientLimitReached,
   couponsLimitReached,
   errorOccured,
+  countryNotSupported,
 } from "#utils/errors";
-import { deleteCacheItem } from "#utils/cache";
+import { deleteCacheItem, getCacheItem, setCacheItem } from "#utils/cache";
+import { calculateBaselineAssessmentScore } from "#utils/helperFunctions";
 
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
 const AWS_REGION = process.env.AWS_REGION;
 const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
+
+const QUESTIONS_COUNT = 27;
 
 export const getClientById = async ({ country, language, clientId }) => {
   return await getClientByIdQuery({
@@ -486,6 +501,385 @@ export const addPlatformSuggestion = async ({
     .catch((err) => {
       throw err;
     });
+};
+
+export const addBaselineAssessmentAnswer = async ({
+  country,
+  language,
+  clientDetailId,
+  questionId,
+  answerValue,
+  baselineAssessmentId,
+  currentPosition,
+}) => {
+  try {
+    const questionsCacheKey = `baseline_assessment_questions`;
+    const questionsCacheItem = await getCacheItem(questionsCacheKey).catch(
+      (err) => {
+        console.log("Error getting item from cache: ", err);
+      }
+    );
+
+    const currentQuestion = questionsCacheItem.find(
+      (question) => question.questionId === questionId
+    );
+    const currentQuestionPosition = currentQuestion.position;
+
+    const assessment = await getOrCreateBaselineAssessmentQuery({
+      poolCountry: country,
+      clientDetailId,
+      baselineAssessmentId,
+    })
+      .then((res) => {
+        return res.rows[0];
+      })
+      .catch((err) => {
+        throw err;
+      });
+
+    // Add the answer
+    const answerResult = await addBaselineAssessmentAnswerQuery({
+      poolCountry: country,
+      baselineAssessmentId,
+      questionId,
+      answerValue,
+    });
+
+    const answer = answerResult.rows[0];
+
+    // const currentPosition = assessment.current_position;
+
+    const newPosition =
+      currentQuestionPosition > currentPosition
+        ? currentQuestionPosition
+        : currentPosition + 1;
+
+    let finalResult = null;
+
+    // If we are on the last question, the new position will become 28, so we don't need to update the position
+    if (newPosition !== 28) {
+      // Update assessment position if this question position is higher than current
+      // Note: We'd need to get the question position, but for simplicity, we'll increment current position
+      await updateBaselineAssessmentPositionQuery({
+        poolCountry: country,
+        baselineAssessmentId: assessment.baseline_assessment_id,
+        position:
+          currentQuestionPosition > currentPosition
+            ? currentQuestionPosition
+            : currentPosition + 1,
+      });
+    } else {
+      // Get all user answers for the assessment, to calculate the score
+      const clientAnswers =
+        await getClientAnswersForBaselineAssessmentByIdQuery({
+          poolCountry: country,
+          clientDetailId,
+          baselineAssessmentId: assessment.baseline_assessment_id,
+        }).then((res) => {
+          if (res.rowCount === 0) {
+            return [];
+          } else {
+            return res.rows;
+          }
+        });
+
+      const {
+        psychological: psychologicalScore,
+        biological: biologicalScore,
+        social: socialScore,
+      } = clientAnswers.reduce(
+        (acc, answer) => {
+          const question = questionsCacheItem.find(
+            (question) => question.questionId === answer.question_id
+          );
+          acc[question.dimension] = acc[question.dimension] || 0;
+          acc[question.dimension] += answer.answer_value;
+          return acc;
+        },
+        { psychological: 0, biological: 0, social: 0 }
+      );
+
+      finalResult = await calculateBaselineAssessmentScore(
+        {
+          psychological: psychologicalScore,
+          biological: biologicalScore,
+          social: socialScore,
+        },
+        country
+      );
+
+      await updateBaselineAssessmentStatusQuery({
+        poolCountry: country,
+        baselineAssessmentId: assessment.baseline_assessment_id,
+        status: "completed",
+        psychologicalScore,
+        biologicalScore,
+        socialScore,
+      });
+    }
+
+    return {
+      success: true,
+      baselineAssessmentId: assessment.baseline_assessment_id,
+      answerId: answer.answer_id,
+      answeredAt: answer.answered_at,
+      finalResult,
+    };
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getAllBaselineAssessmentQuestions = async ({
+  country,
+  language,
+}) => {
+  try {
+    if (country !== "RO") {
+      throw countryNotSupported(language);
+    }
+
+    const cacheKey = "baseline_assessment_questions";
+    const cacheItem = await getCacheItem(cacheKey).catch((err) => {
+      console.log("Error getting item from cache: ", err);
+    });
+
+    if (cacheItem) {
+      return cacheItem;
+    }
+
+    return await getAllBaselineAssessmentQuestionsQuery({
+      poolCountry: country,
+    }).then(async (res) => {
+      const questions = res.rows.map((question) => ({
+        questionId: question.question_id,
+        position: question.position,
+        questionText: question.question_text,
+        dimension: question.dimension,
+        isCritical: question.is_critical,
+        createdAt: question.created_at,
+      }));
+
+      await setCacheItem(cacheKey, questions, 60 * 60 * 24 * 30).catch(
+        (err) => {
+          console.log("Erro saving item to cache: ", err);
+        }
+      );
+
+      return questions;
+    });
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getClientBaselineAssessments = async ({
+  country,
+  language,
+  clientDetailId,
+}) => {
+  try {
+    if (country !== "RO") {
+      throw countryNotSupported(language);
+    }
+
+    const assessments = await getClientBaselineAssessmentsQuery({
+      poolCountry: country,
+      clientDetailId,
+    }).then((res) => {
+      const assessments = res.rows.map((assessment) => ({
+        baselineAssessmentId: assessment.baseline_assessment_id,
+        clientDetailId: assessment.client_detail_id,
+        startedAt: assessment.started_at,
+        completedAt: assessment.completed_at,
+        currentPosition: assessment.current_position,
+        status: assessment.status,
+        createdAt: assessment.created_at,
+        updatedAt: assessment.updated_at,
+        totalQuestions: QUESTIONS_COUNT,
+        completionPercentage: Math.round(
+          (parseInt(assessment.current_position - 1) / QUESTIONS_COUNT) * 100
+        ),
+        finalResult: {
+          psychological: assessment.psychological_score,
+          biological: assessment.biological_score,
+          social: assessment.social_score,
+        },
+      }));
+      return assessments;
+    });
+
+    // Calculate the final result for each assessment
+    await Promise.all(
+      assessments.map(async (assessment, index) => {
+        if (assessment.status === "completed") {
+          const finalResult = await calculateBaselineAssessmentScore(
+            {
+              psychological: assessment.finalResult.psychological,
+              biological: assessment.finalResult.biological,
+              social: assessment.finalResult.social,
+            },
+            country
+          );
+          assessments[index].finalResult = finalResult;
+          return finalResult;
+        }
+      })
+    );
+
+    return assessments;
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getClientAnswersForBaselineAssessmentById = async ({
+  country,
+  language,
+  clientDetailId,
+  baselineAssessmentId,
+}) => {
+  return await getClientAnswersForBaselineAssessmentByIdQuery({
+    poolCountry: country,
+    clientDetailId,
+    baselineAssessmentId,
+  }).then((res) => {
+    if (res.rowCount === 0) {
+      return [];
+    } else {
+      // Convert the array of rows into a single object mapping question_id to answer_value
+      const answersObj = {};
+      res.rows.forEach((x) => {
+        answersObj[x.question_id] = x.answer_value;
+      });
+      return answersObj;
+    }
+  });
+};
+
+export const createBaselineAssessment = async ({
+  country,
+  language,
+  clientDetailId,
+}) => {
+  try {
+    if (country !== "RO") {
+      throw countryNotSupported(language);
+    }
+
+    // When a new assessment is created, we need to anonimize the previous assessments
+    await anonimizeClientBaselineAssessmentsQuery({
+      country,
+      clientDetailId,
+    }).catch((err) => {
+      console.log(
+        `Error "${err}" anonimizing client baseline assessments: `,
+        clientDetailId
+      );
+    });
+
+    return await createBaselineAssessmentQuery({
+      poolCountry: country,
+      clientDetailId,
+    }).then((res) => {
+      const assessment = res.rows[0];
+      return {
+        baselineAssessmentId: assessment.baseline_assessment_id,
+        clientDetailId: assessment.client_detail_id,
+        startedAt: assessment.started_at,
+        completedAt: assessment.completed_at,
+        currentPosition: assessment.current_position,
+        status: assessment.status,
+        createdAt: assessment.created_at,
+        updatedAt: assessment.updated_at,
+        totalQuestions: QUESTIONS_COUNT,
+        completionPercentage: 0,
+      };
+    });
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const updateClientHasCheckedBaselineAssessment = async ({
+  country,
+  language,
+  clientDetailId,
+  hasCheckedBaselineAssessment,
+}) => {
+  return await updateClientHasCheckedBaselineAssessmentQuery({
+    poolCountry: country,
+    clientDetailId,
+    hasCheckedBaselineAssessment,
+  })
+    .then(() => {
+      return {
+        success: true,
+      };
+    })
+    .catch((err) => {
+      console.log(err);
+      throw clientNotFound(language);
+    });
+};
+
+export const getLatestBaselineAssessment = async ({
+  country,
+  language,
+  clientDetailId,
+}) => {
+  try {
+    if (country !== "RO") {
+      throw countryNotSupported(language);
+    }
+
+    const assessment = await getLatestBaselineAssessmentQuery({
+      poolCountry: country,
+      clientDetailId,
+    }).then((res) => {
+      if (res.rowCount === 0) {
+        return {};
+      }
+
+      const assessmentData = res.rows[0];
+      return {
+        baselineAssessmentId: assessmentData.baseline_assessment_id,
+        clientDetailId: assessmentData.client_detail_id,
+        startedAt: assessmentData.started_at,
+        completedAt: assessmentData.completed_at,
+        currentPosition: assessmentData.current_position,
+        status: assessmentData.status,
+        createdAt: assessmentData.created_at,
+        updatedAt: assessmentData.updated_at,
+        totalQuestions: QUESTIONS_COUNT,
+        completionPercentage: Math.round(
+          (parseInt(assessmentData.current_position - 1) / QUESTIONS_COUNT) *
+            100
+        ),
+        finalResult: {
+          psychological: assessmentData.psychological_score,
+          biological: assessmentData.biological_score,
+          social: assessmentData.social_score,
+        },
+      };
+    });
+
+    if (assessment && assessment.status === "completed") {
+      const finalResult = await calculateBaselineAssessmentScore(
+        {
+          psychological: assessment.finalResult.psychological,
+          biological: assessment.finalResult.biological,
+          social: assessment.finalResult.social,
+        },
+        country
+      );
+      assessment.finalResult = finalResult;
+    }
+
+    return assessment;
+  } catch (err) {
+    throw err;
+  }
 };
 
 export const addSOSCenterClick = async ({
