@@ -1,5 +1,5 @@
 export default {
-  email_required_error: "Należy podać ważny adres email",
+  email_required_error: "Należy podać poprawny adres email",
   access_token_required_error: "Należy podać prawidłowy token dostępu",
   nickname_required_error: "Musisz podać nick",
   client_not_found_error: "Nie znaleziono klienta",
