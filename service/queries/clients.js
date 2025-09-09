@@ -26,7 +26,7 @@ export const getClientByUserID = async (poolCountry, user_id) =>
 
     ), clientData AS (
 
-        SELECT client_detail."client_detail_id", "name", surname, nickname, email, image, sex, year_of_birth, urban_rural, data_processing, access_token, push_notification_tokens
+        SELECT client_detail."client_detail_id", "name", surname, nickname, email, image, sex, year_of_birth, urban_rural, data_processing, access_token, push_notification_tokens, has_checked_baseline_assessment
         FROM client_detail
           JOIN userData ON userData.client_detail_id = client_detail.client_detail_id
         ORDER BY client_detail.created_at DESC
@@ -372,6 +372,181 @@ export const addPlatformSuggestionQuery = async ({
   );
 };
 
+export const getOrCreateBaselineAssessmentQuery = async ({
+  poolCountry,
+  clientDetailId,
+  baselineAssessmentId,
+}) => {
+  if (baselineAssessmentId) {
+    // Return existing assessment
+    return await getDBPool("clinicalDb", poolCountry).query(
+      `
+        SELECT baseline_assessment_id, client_detail_id, started_at, completed_at, current_position, status
+        FROM baseline_assessment_session
+        WHERE baseline_assessment_id = $1 AND client_detail_id = $2
+        LIMIT 1
+      `,
+      [baselineAssessmentId, clientDetailId]
+    );
+  } else {
+    // Create new assessment
+    return await getDBPool("clinicalDb", poolCountry).query(
+      `
+        INSERT INTO baseline_assessment_session (client_detail_id)
+        VALUES ($1)
+        RETURNING baseline_assessment_id, client_detail_id, started_at, completed_at, current_position, status
+      `,
+      [clientDetailId]
+    );
+  }
+};
+
+export const addBaselineAssessmentAnswerQuery = async ({
+  poolCountry,
+  baselineAssessmentId,
+  questionId,
+  answerValue,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      INSERT INTO baseline_assessment_answer (baseline_assessment_id, question_id, answer_value)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (baseline_assessment_id, question_id)
+      DO UPDATE SET 
+        answer_value = EXCLUDED.answer_value,
+        answered_at = NOW()
+      RETURNING answer_id, baseline_assessment_id, question_id, answer_value, answered_at
+    `,
+    [baselineAssessmentId, questionId, answerValue]
+  );
+};
+
+export const updateBaselineAssessmentPositionQuery = async ({
+  poolCountry,
+  baselineAssessmentId,
+  position,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      UPDATE baseline_assessment_session
+      SET current_position = $1, updated_at = NOW()
+      WHERE baseline_assessment_id = $2
+      RETURNING baseline_assessment_id, current_position
+    `,
+    [position, baselineAssessmentId]
+  );
+};
+
+export const getAllBaselineAssessmentQuestionsQuery = async ({
+  poolCountry,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      SELECT question_id, position, question_text, dimension, is_critical, created_at
+      FROM baseline_assessment_question
+      ORDER BY position ASC
+    `
+  );
+};
+
+export const getClientBaselineAssessmentsQuery = async ({
+  poolCountry,
+  clientDetailId,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      SELECT 
+        baseline_assessment_id,
+        client_detail_id,
+        started_at,
+        completed_at,
+        current_position,
+        status,
+        created_at,
+        updated_at,
+        psychological_score,
+        biological_score,
+        social_score
+      FROM baseline_assessment_session bas
+      WHERE bas.client_detail_id = $1
+      ORDER BY bas.created_at DESC
+    `,
+    [clientDetailId]
+  );
+};
+
+export const getClientAnswersForBaselineAssessmentByIdQuery = async ({
+  poolCountry,
+  baselineAssessmentId,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      SELECT 
+        answer_id,
+        baseline_assessment_id,
+        question_id,
+        answer_value,
+        answered_at
+      FROM baseline_assessment_answer
+      WHERE baseline_assessment_id = $1
+    `,
+    [baselineAssessmentId]
+  );
+};
+
+export const createBaselineAssessmentQuery = async ({
+  poolCountry,
+  clientDetailId,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      INSERT INTO baseline_assessment_session (client_detail_id)
+      VALUES ($1)
+      RETURNING baseline_assessment_id, client_detail_id, started_at, completed_at, current_position, status, created_at, updated_at
+    `,
+    [clientDetailId]
+  );
+};
+
+export const updateBaselineAssessmentStatusQuery = async ({
+  poolCountry,
+  baselineAssessmentId,
+  status,
+  psychologicalScore,
+  biologicalScore,
+  socialScore,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      UPDATE baseline_assessment_session
+      SET status = $1, updated_at = NOW(), psychological_score = $3, biological_score = $4, social_score = $5
+      WHERE baseline_assessment_id = $2
+      RETURNING baseline_assessment_id, status
+    `,
+    [
+      status,
+      baselineAssessmentId,
+      psychologicalScore,
+      biologicalScore,
+      socialScore,
+    ]
+  );
+};
+
+export const updateClientHasCheckedBaselineAssessmentQuery = async ({
+  poolCountry,
+  clientDetailId,
+  hasCheckedBaselineAssessment,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+      UPDATE client_detail 
+      SET has_checked_baseline_assessment = $1
+      WHERE client_detail_id = $2
+      RETURNING *;
+    `,
+    [hasCheckedBaselineAssessment, clientDetailId]
+  );
 export const addSOSCenterClickQuery = async ({
   poolCountry,
   clientDetailId,
@@ -386,5 +561,55 @@ export const addSOSCenterClickQuery = async ({
       RETURNING id;
     `,
     [sosCenterId, isMain, clientDetailId || null, platform]
+  );
+};
+
+export const getLatestBaselineAssessmentQuery = async ({
+  poolCountry,
+  clientDetailId,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      SELECT 
+        baseline_assessment_id,
+        client_detail_id,
+        started_at,
+        completed_at,
+        current_position,
+        status,
+        created_at,
+        updated_at,
+        psychological_score,
+        biological_score,
+        social_score
+      FROM baseline_assessment_session bas
+      WHERE bas.client_detail_id = $1
+      ORDER BY bas.created_at DESC
+      LIMIT 1
+    `,
+    [clientDetailId]
+  );
+};
+
+export const getBaselineAssessmentThresholdsQuery = async (country) => {
+  return await getDBPool("clinicalDb", country).query(
+    `
+      SELECT factor, below, above
+      FROM baseline_assessment_threshold
+    `
+  );
+};
+
+export const anonimizeClientBaselineAssessmentsQuery = async ({
+  country,
+  clientDetailId,
+}) => {
+  return await getDBPool("clinicalDb", country).query(
+    `
+      UPDATE baseline_assessment_session
+      SET client_detail_id = NULL
+      WHERE client_detail_id = $1
+    `,
+    [clientDetailId]
   );
 };

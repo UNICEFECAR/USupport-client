@@ -14,4 +14,5 @@ export default {
   consultation_not_found_error: "Consultation not found",
   error_occured: "An error occurred",
   organization_not_found_error: "Organization not found",
+  country_not_supported_error: "Functionality not supported in this country",
 };

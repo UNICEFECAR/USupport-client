@@ -1,5 +1,5 @@
 export default {
-  email_required_error: "Należy podać ważny adres email",
+  email_required_error: "Należy podać poprawny adres email",
   access_token_required_error: "Należy podać prawidłowy token dostępu",
   nickname_required_error: "Musisz podać nick",
   client_not_found_error: "Nie znaleziono klienta",
@@ -14,4 +14,5 @@ export default {
   consultation_not_found_error: "Nie znaleziono konsultacji",
   error_occured: "Wystąpił błąd",
   organization_not_found_error: "Nie znaleziono organizacji",
+  country_not_supported_error: "Funkcja nie jest obsługiwana w tym kraju",
 };
