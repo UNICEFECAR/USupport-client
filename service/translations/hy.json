@@ -10,5 +10,6 @@
   "client_limit_reached_error": "Դուք հասել եք այս արշավի մեջ տեղ գտած խորհրդատվությունների առավելագույն թվին։",
   "coupons_limit_reached_error": "Սույն արշավի մեջ տեղ գտած խորհրդատվությունների առավելագույն թիվը լրացել է։",
   "consultation_not_found_error": "Խորհրդատվությունը չի գտնվել",
-  "error_occured": "Տեղի է ունեցել սխալ"
+  "error_occured": "Տեղի է ունեցել սխալ",
+  "organization_not_found_error": "Organization not found"
 }
