@@ -10,7 +10,7 @@
   "client_limit_reached_error": "Сіз осы науқанда қамтылған кеңестердің максималды санына жеттіңіз.",
   "coupons_limit_reached_error": "Осы науқанда қамтылған кеңестердің максималды санына жетті",
   "consultation_not_found_error": "Консультация табылмады",
-  "en_error_occured": "Қателік пайда болды",
+  "error_occured": "Қателік пайда болды",
   "organization_not_found_error": "Организация табылмады",
   "country_not_supported_error": "Бұл елде қызмет ету қолжетерлік емес"
 }
