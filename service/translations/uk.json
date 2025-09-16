@@ -1,6 +1,6 @@
 {
   "email_required_error": "Потрібно вказати дійсну електронну пошту",
-  "access_token_required_error": "Потрібно надати дійсний токен доступу",
+  "access_token_required_error": "Потрібно надати дійсний код доступу",
   "nickname_required_error": "Потрібно вказати нікнейм",
   "client_not_found_error": "Клієнта/ки не знайдено",
   "provider_not_found_error": "Консультанта/ки не знайдено",
