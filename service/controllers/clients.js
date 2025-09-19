@@ -805,6 +805,7 @@ export const updateClientHasCheckedBaselineAssessment = async ({
   country,
   language,
   clientDetailId,
+  userId,
   hasCheckedBaselineAssessment,
 }) => {
   return await updateClientHasCheckedBaselineAssessmentQuery({
@@ -812,7 +813,10 @@ export const updateClientHasCheckedBaselineAssessment = async ({
     clientDetailId,
     hasCheckedBaselineAssessment,
   })
-    .then(() => {
+    .then(async (res) => {
+      const cacheKey = `client_${country}_${userId}`;
+      const client = res.rows[0];
+      await setCacheItem(cacheKey, client, 60 * 60 * 2);
       return {
         success: true,
       };

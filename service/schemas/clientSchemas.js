@@ -231,6 +231,7 @@ export const createBaselineAssessmentSchema = yup.object().shape({
 export const updateClientHasCheckedBaselineAssessmentSchema = yup
   .object()
   .shape({
+    userId: yup.string().uuid().required(),
     clientDetailId: yup.string().uuid().required(),
     country: yup.string().required(),
     language: yup.string().required(),

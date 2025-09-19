@@ -537,12 +537,13 @@ router.patch(
     const country = req.header("x-country-alpha-2");
     const language = req.header("x-language-alpha-2");
     const clientDetailId = req.user.client_detail_id;
+    const userId = req.user.user_id;
     const payload = req.body;
 
     return await updateClientHasCheckedBaselineAssessmentSchema
       .noUnknown(true)
       .strict()
-      .validate({ country, language, clientDetailId, ...payload })
+      .validate({ country, language, clientDetailId, userId, ...payload })
       .then(updateClientHasCheckedBaselineAssessment)
       .then((result) => res.status(200).send(result))
       .catch(next);

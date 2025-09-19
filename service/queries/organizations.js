@@ -6,7 +6,7 @@ export const getOrganizationsQuery = async ({
   district,
   paymentMethod,
   userInteraction,
-  specialisation,
+  specialisations,
   propertyType,
   userLocation,
 }) => {
@@ -122,11 +122,11 @@ export const getOrganizationsQuery = async ({
                   AND user_interaction_id = $4
               ))
           
-          AND ($5::uuid IS NULL OR EXISTS (
+          AND ($5::uuid[] IS NULL OR $5 = '{}' OR EXISTS (
                 SELECT 1
                 FROM organization_specialisation_links
                 WHERE organization_id = o.organization_id
-                  AND organization_specialisation_id = $5
+                  AND organization_specialisation_id = ANY($5)
               ))
           
           AND ($6::uuid IS NULL OR EXISTS (
@@ -169,7 +169,7 @@ export const getOrganizationsQuery = async ({
       district,
       paymentMethod,
       userInteraction,
-      specialisation,
+      specialisations,
       propertyType,
       lat || null,
       lng || null,
