@@ -74,5 +74,5 @@ export const getPersonalizedOrganizations = async ({
     return matching;
   }
 
-  return { matching };
+  return { matching: [] };
 };

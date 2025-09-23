@@ -1,4 +1,6 @@
+// eslint-disable-next-line
 import { createRequire } from "node:module";
+
 const require = createRequire(import.meta.url);
 
 const en = require("./en.json");
