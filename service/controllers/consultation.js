@@ -241,7 +241,7 @@ export const unblockSlot = async ({
   })
     .then((res) => {
       if (res.rowCount === 0) {
-        throw consultationNotFound(language);
+        throw consultationNotFound("en");
       } else {
         return { success: true };
       }
