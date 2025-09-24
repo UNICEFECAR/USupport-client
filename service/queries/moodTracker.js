@@ -39,9 +39,26 @@ export const getMoodTrackEntriesQuery = async ({
       SELECT mood, comment, time, mood_tracker_id, is_critical
       FROM mood_tracker
       WHERE client_detail_id = $1
+        AND is_deleted = false
       ORDER BY id DESC
       OFFSET $2 LIMIT $3;
     `,
     [client_id, offset, limit]
+  );
+};
+
+export const deleteMoodTrackDataQuery = async ({
+  poolCountry,
+  client_detail_id,
+}) => {
+  console.log();
+
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      UPDATE mood_tracker
+      SET is_deleted = true, deleted_at = now(), client_detail_id = NULL 
+      WHERE client_detail_id = $1
+    `,
+    [client_detail_id]
   );
 };

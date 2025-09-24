@@ -19,3 +19,9 @@ export const getMoodTrackForWeekSchema = yup.object().shape({
   limit: yup.number().required(),
   pageNum: yup.number().required(),
 });
+
+export const deleteMoodTrackerHistorySchema = yup.object().shape({
+  client_detail_id: yup.string().uuid().required(),
+  country: yup.string().required(),
+  // language: yup.string().required(),
+});

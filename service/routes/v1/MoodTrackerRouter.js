@@ -5,12 +5,14 @@ import {
   getMoodTrackForTodaySchema,
   addMoodTrackForTodaySchema,
   getMoodTrackForWeekSchema,
+  deleteMoodTrackerHistorySchema,
 } from "#schemas/moodTrackerSchemas";
 
 import {
   getMoodTrackForToday,
   addMoodTrackForToday,
   getMoodTrackEntries,
+  deleteMoodTrackerHistory,
 } from "#controllers/moodTracker";
 
 const router = express.Router();
@@ -67,6 +69,24 @@ router.route("/").post(populateUser, async (req, res, next) => {
     .strict(true)
     .validate({ country, client_id, ...payload })
     .then(addMoodTrackForToday)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.route("/history/delete").put(populateClient, async (req, res, next) => {
+  /**
+   * #route   PUT /client/v1/mood-tracker/history/delete
+   * #desc    Soft delete mood tracker entry
+   */
+  const country = req.header("x-country-alpha-2");
+  // const language = req.header("x-language-alpha-2");
+  const client_detail_id = req.client.client_detail_id;
+
+  return await deleteMoodTrackerHistorySchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ country, client_detail_id })
+    .then(deleteMoodTrackerHistory)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
