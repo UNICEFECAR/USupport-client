@@ -24,12 +24,14 @@ export const addMoodTrackForToday = async ({
   client_id,
   mood,
   comment,
+  emergency,
 }) => {
   await addMoodTrackForTodayQuery({
     poolCountry: country,
     client_id,
     mood,
     comment,
+    emergency: emergency || false,
   }).catch((err) => {
     throw err;
   });

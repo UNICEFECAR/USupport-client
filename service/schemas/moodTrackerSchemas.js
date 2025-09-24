@@ -10,6 +10,7 @@ export const addMoodTrackForTodaySchema = yup.object().shape({
   client_id: yup.string().uuid().required(),
   mood: yup.string().required(),
   comment: yup.string().notRequired(),
+  emergency: yup.boolean().notRequired(),
 });
 
 export const getMoodTrackForWeekSchema = yup.object().shape({
