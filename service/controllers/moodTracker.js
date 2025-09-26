@@ -2,6 +2,7 @@ import {
   getMoodTrackForTodayQuery,
   addMoodTrackForTodayQuery,
   getMoodTrackEntriesQuery,
+  deleteMoodTrackDataQuery,
 } from "#queries/moodTracker";
 
 export const getMoodTrackForToday = async ({ country, client_id }) => {
@@ -24,12 +25,14 @@ export const addMoodTrackForToday = async ({
   client_id,
   mood,
   comment,
+  emergency,
 }) => {
   await addMoodTrackForTodayQuery({
     poolCountry: country,
     client_id,
     mood,
     comment,
+    emergency: emergency || false,
   }).catch((err) => {
     throw err;
   });
@@ -65,4 +68,18 @@ export const getMoodTrackEntries = async ({
     }
   });
   return moodTracks;
+};
+
+export const deleteMoodTrackerHistory = async ({
+  country,
+  client_detail_id,
+}) => {
+  return await deleteMoodTrackDataQuery({
+    poolCountry: country,
+    client_detail_id,
+  })
+    .then(() => ({ success: true }))
+    .catch((err) => {
+      throw err;
+    });
 };

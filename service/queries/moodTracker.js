@@ -17,13 +17,14 @@ export const addMoodTrackForTodayQuery = async ({
   client_id,
   mood,
   comment,
+  emergency,
 }) => {
   return await getDBPool("clinicalDb", poolCountry).query(
     `
-      INSERT INTO mood_tracker (client_detail_id, mood, comment, time)
-      VALUES ($1, $2, $3, now());
+      INSERT INTO mood_tracker (client_detail_id, mood, comment, time, is_critical)
+      VALUES ($1, $2, $3, now(), $4);
     `,
-    [client_id, mood, comment]
+    [client_id, mood, comment, emergency]
   );
 };
 
@@ -35,12 +36,29 @@ export const getMoodTrackEntriesQuery = async ({
 }) => {
   return await getDBPool("clinicalDb", poolCountry).query(
     `
-      SELECT mood, comment, time, mood_tracker_id
+      SELECT mood, comment, time, mood_tracker_id, is_critical
       FROM mood_tracker
       WHERE client_detail_id = $1
+        AND is_deleted = false
       ORDER BY id DESC
       OFFSET $2 LIMIT $3;
     `,
     [client_id, offset, limit]
+  );
+};
+
+export const deleteMoodTrackDataQuery = async ({
+  poolCountry,
+  client_detail_id,
+}) => {
+  console.log();
+
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      UPDATE mood_tracker
+      SET is_deleted = true, deleted_at = now(), client_detail_id = NULL 
+      WHERE client_detail_id = $1
+    `,
+    [client_detail_id]
   );
 };
