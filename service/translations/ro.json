@@ -1,0 +1,15 @@
+{
+  "email_required_error": "Trebuie să furnizați un e-mail valid",
+  "access_token_required_error": "Trebuie să furnizați un token de acces valid",
+  "nickname_required_error": "Trebuie să furnizați un pseudonim",
+  "client_not_found_error": "Clientul nu a fost găsit",
+  "provider_not_found_error": "Furnizorul nu a fost găsit",
+  "incorrect_password_error": "Parola furnizată este incorectă",
+  "email_already_used_error": "Acest e-mail este deja utilizat",
+  "coupon_not_found_error": "Cuponul nu a fost găsit",
+  "client_limit_reached_error": "Ați atins numărul maxim de consultații acoperite de această campanie",
+  "coupons_limit_reached_error": "Numărul maxim de consultații acoperite de această campanie a fost atins",
+  "consultation_not_found_error": "Consultația nu a fost găsită",
+  "error_occured": "A apărut o eroare",
+  "organization_not_found_error": "Organization not found"
+}
