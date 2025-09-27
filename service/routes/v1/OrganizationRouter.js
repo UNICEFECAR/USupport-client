@@ -3,11 +3,14 @@ import express from "express";
 import {
   getOrganizationSchema,
   organizationIdSchema,
+  getPersonalizedOrganizationsSchema,
 } from "#schemas/organizationSchemas";
 import {
   getOrganizations,
   getOrganizationById,
+  getPersonalizedOrganizations,
 } from "#controllers/organizations";
+import { populateClient } from "#middlewares/populateMiddleware";
 
 const router = express.Router();
 
@@ -23,7 +26,7 @@ router.get("/", async (req, res, next) => {
     district,
     paymentMethod,
     userInteraction,
-    specialisation,
+    specialisations,
     propertyType,
     userLocationLat,
     userLocationLng,
@@ -40,13 +43,28 @@ router.get("/", async (req, res, next) => {
       paymentMethod: paymentMethod || null,
       userInteraction: userInteraction || null,
       propertyType: propertyType || null,
-      specialisation: specialisation || null,
+      specialisations: specialisations
+        ? specialisations.split(",").filter((s) => s.trim())
+        : null,
       userLocation: {
         lat: Number(userLocationLat) || null,
         lng: Number(userLocationLng) || null,
       },
     })
     .then(getOrganizations)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.get("/personalized", populateClient, async (req, res, next) => {
+  const country = req.header("x-country-alpha-2");
+  const clientDetailId = req.client.client_detail_id;
+
+  return await getPersonalizedOrganizationsSchema
+    .noUnknown(true)
+    .strict()
+    .validate({ country, clientDetailId })
+    .then(getPersonalizedOrganizations)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });

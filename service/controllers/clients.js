@@ -513,7 +513,7 @@ export const addBaselineAssessmentAnswer = async ({
   currentPosition,
 }) => {
   try {
-    const questionsCacheKey = `baseline_assessment_questions`;
+    const questionsCacheKey = "baseline_assessment_questions";
     const questionsCacheItem = await getCacheItem(questionsCacheKey).catch(
       (err) => {
         console.log("Error getting item from cache: ", err);
@@ -735,7 +735,7 @@ export const getClientBaselineAssessments = async ({
 
 export const getClientAnswersForBaselineAssessmentById = async ({
   country,
-  language,
+  // language,
   clientDetailId,
   baselineAssessmentId,
 }) => {
@@ -805,6 +805,7 @@ export const updateClientHasCheckedBaselineAssessment = async ({
   country,
   language,
   clientDetailId,
+  userId,
   hasCheckedBaselineAssessment,
 }) => {
   return await updateClientHasCheckedBaselineAssessmentQuery({
@@ -812,7 +813,10 @@ export const updateClientHasCheckedBaselineAssessment = async ({
     clientDetailId,
     hasCheckedBaselineAssessment,
   })
-    .then(() => {
+    .then(async (res) => {
+      const cacheKey = `client_${country}_${userId}`;
+      const client = res.rows[0];
+      await setCacheItem(cacheKey, client, 60 * 60 * 2);
       return {
         success: true,
       };
@@ -884,7 +888,7 @@ export const getLatestBaselineAssessment = async ({
 
 export const addSOSCenterClick = async ({
   country,
-  language,
+  // language,
   clientDetailId,
   sosCenterId,
   isMain,

@@ -519,7 +519,7 @@ export const updateBaselineAssessmentStatusQuery = async ({
   return await getDBPool("clinicalDb", poolCountry).query(
     `
       UPDATE baseline_assessment_session
-      SET status = $1, updated_at = NOW(), psychological_score = $3, biological_score = $4, social_score = $5
+      SET status = $1, completed_at = NOW(), psychological_score = $3, biological_score = $4, social_score = $5
       WHERE baseline_assessment_id = $2
       RETURNING baseline_assessment_id, status
     `,
