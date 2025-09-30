@@ -3,7 +3,10 @@ import {
   addMoodTrackForTodayQuery,
   getMoodTrackEntriesQuery,
   deleteMoodTrackDataQuery,
+  getMoodTrackEntriesForPeriodQuery,
 } from "#queries/moodTracker";
+
+import { generateMoodTrackerCSV } from "#utils/mood-tracker";
 
 export const getMoodTrackForToday = async ({ country, client_id }) => {
   const moodTracks = await getMoodTrackForTodayQuery({
@@ -79,6 +82,47 @@ export const deleteMoodTrackerHistory = async ({
     client_detail_id,
   })
     .then(() => ({ success: true }))
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const generateReportForPeriod = async ({
+  country,
+  client_detail_id,
+  startDate,
+  endDate,
+  language,
+}) => {
+  return await getMoodTrackEntriesForPeriodQuery({
+    poolCountry: country,
+    client_detail_id,
+    startDate,
+    endDate,
+  })
+    .then((res) => {
+      console.log(res.rows);
+      const startDateString = new Date(startDate).toISOString().split("T")[0];
+      const endDateString = new Date(endDate).toISOString().split("T")[0];
+      const fileName = `mood-tracker-report-${country}-${startDateString}-to-${endDateString}.csv`;
+      const csvData = generateMoodTrackerCSV({
+        moodTracks: res.rows,
+        startDateString,
+        endDateString,
+        language,
+      });
+      return {
+        success: true,
+        message: "Mood tracker report generated successfully",
+        csvData,
+        fileName,
+        totalMoodTracks: res.rows.length,
+        dateRange: {
+          start: startDateString,
+          end: endDateString,
+        },
+      };
+    })
     .catch((err) => {
       throw err;
     });
