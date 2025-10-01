@@ -4,11 +4,13 @@ import {
   getOrganizationSchema,
   organizationIdSchema,
   getPersonalizedOrganizationsSchema,
+  getOrganizationSpecializationsSchema,
 } from "#schemas/organizationSchemas";
 import {
   getOrganizations,
   getOrganizationById,
   getPersonalizedOrganizations,
+  getOrganizationSpecializations,
 } from "#controllers/organizations";
 import { populateClient } from "#middlewares/populateMiddleware";
 
@@ -65,6 +67,22 @@ router.get("/personalized", populateClient, async (req, res, next) => {
     .strict()
     .validate({ country, clientDetailId })
     .then(getPersonalizedOrganizations)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.get("/specializations", async (req, res, next) => {
+  /**
+   * #route   GET /client/v1/organization/specializations
+   * #desc    Get organization specializations
+   */
+  const country = req.header("x-country-alpha-2");
+
+  return await getOrganizationSpecializationsSchema
+    .noUnknown(true)
+    .strict()
+    .validate({ country })
+    .then(getOrganizationSpecializations)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });

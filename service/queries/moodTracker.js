@@ -62,3 +62,20 @@ export const deleteMoodTrackDataQuery = async ({
     [client_detail_id]
   );
 };
+
+export const getMoodTrackEntriesForPeriodQuery = async ({
+  poolCountry,
+  client_detail_id,
+  startDate,
+  endDate,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      SELECT mood, comment, time, mood_tracker_id, is_critical
+      FROM mood_tracker
+      WHERE client_detail_id = $1
+      AND time between $2 and $3
+    `,
+    [client_detail_id, startDate, endDate]
+  );
+};

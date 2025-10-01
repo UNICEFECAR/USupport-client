@@ -33,6 +33,7 @@ import {
   addSOSCenterClickQuery,
   getLatestBaselineAssessmentQuery,
   anonimizeClientBaselineAssessmentsQuery,
+  getClientCompletedBaselineAssessmentsQuery,
 } from "#queries/clients";
 
 import {
@@ -599,6 +600,17 @@ export const addBaselineAssessmentAnswer = async ({
         { psychological: 0, biological: 0, social: 0 }
       );
 
+      const previousCompletedBaselineAssessments =
+        await getClientCompletedBaselineAssessmentsQuery({
+          poolCountry: country,
+          clientDetailId,
+        }).then((res) => {
+          if (res.rowCount === 0) {
+            return null;
+          }
+          return res.rows[0];
+        });
+
       finalResult = await calculateBaselineAssessmentScore(
         {
           psychological: psychologicalScore,
@@ -607,6 +619,45 @@ export const addBaselineAssessmentAnswer = async ({
         },
         country
       );
+      finalResult.psychologicalScore = psychologicalScore;
+      finalResult.biologicalScore = biologicalScore;
+      finalResult.socialScore = socialScore;
+
+      if (previousCompletedBaselineAssessments) {
+        const {
+          psychological_score: previousPsychologicalScore,
+          biological_score: previousBiologicalScore,
+          social_score: previousSocialScore,
+        } = previousCompletedBaselineAssessments;
+
+        const comparePrevious = (previousScore, currentScore) => {
+          return currentScore > previousScore
+            ? "higher"
+            : currentScore < previousScore
+            ? "lower"
+            : "equal";
+        };
+
+        finalResult.comparePrevious = {
+          psychological: comparePrevious(
+            previousPsychologicalScore,
+            psychologicalScore
+          ),
+          biological: comparePrevious(previousBiologicalScore, biologicalScore),
+          social: comparePrevious(previousSocialScore, socialScore),
+        };
+
+        // When a new assessment is created, we need to anonimize the previous assessments
+        await anonimizeClientBaselineAssessmentsQuery({
+          country,
+          clientDetailId,
+        }).catch((err) => {
+          console.log(
+            `Error "${err}" anonimizing client baseline assessments: `,
+            clientDetailId
+          );
+        });
+      }
 
       await updateBaselineAssessmentStatusQuery({
         poolCountry: country,
@@ -766,18 +817,6 @@ export const createBaselineAssessment = async ({
     if (country !== "RO") {
       throw countryNotSupported(language);
     }
-
-    // When a new assessment is created, we need to anonimize the previous assessments
-    await anonimizeClientBaselineAssessmentsQuery({
-      country,
-      clientDetailId,
-    }).catch((err) => {
-      console.log(
-        `Error "${err}" anonimizing client baseline assessments: `,
-        clientDetailId
-      );
-    });
-
     return await createBaselineAssessmentQuery({
       poolCountry: country,
       clientDetailId,
