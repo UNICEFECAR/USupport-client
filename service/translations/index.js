@@ -8,6 +8,7 @@ const hy = require("./hy.json");
 const kk = require("./kk.json");
 const ru = require("./ru.json");
 const pl = require("./pl.json");
+const ro = require("./ro.json");
 const uk = require("./uk.json");
 
 const translations = {
@@ -17,6 +18,7 @@ const translations = {
   kk,
   uk,
   pl,
+  ro,
 };
 
 /**

@@ -177,6 +177,16 @@ export const getOrganizationsQuery = async ({
   );
 };
 
+export const getOrganizationSpecializationsQuery = async ({ country }) => {
+  return await getDBPool("piiDb", country).query(
+    `
+    SELECT organization_specialisation_id as id,name
+    FROM organization_specialisation
+    ORDER BY name ASC
+    `
+  );
+};
+
 export const getOrganizationByIdQuery = async ({ country, organizationId }) => {
   return await getDBPool("piiDb", country).query(
     `

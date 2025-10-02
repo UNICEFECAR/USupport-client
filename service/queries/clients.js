@@ -608,7 +608,24 @@ export const anonimizeClientBaselineAssessmentsQuery = async ({
     `
       UPDATE baseline_assessment_session
       SET client_detail_id = NULL
-      WHERE client_detail_id = $1
+      WHERE client_detail_id = $1 AND status = 'completed'
+    `,
+    [clientDetailId]
+  );
+};
+
+export const getClientCompletedBaselineAssessmentsQuery = async ({
+  poolCountry,
+  clientDetailId,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      SELECT       
+        psychological_score,
+        biological_score,
+        social_score
+      FROM baseline_assessment_session
+      WHERE client_detail_id = $1 AND status = 'completed'
     `,
     [clientDetailId]
   );

@@ -34,3 +34,7 @@ export const getPersonalizedOrganizationsSchema = yup.object().shape({
   country: yup.string().required(),
   clientDetailId: yup.string().required(),
 });
+
+export const getOrganizationSpecializationsSchema = yup.object().shape({
+  country: yup.string().required(),
+});

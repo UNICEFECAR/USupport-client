@@ -1,6 +1,7 @@
 import {
   getOrganizationsQuery,
   getOrganizationByIdQuery,
+  getOrganizationSpecializationsQuery,
 } from "#queries/organizations";
 
 import { getLatestBaselineAssessmentQuery } from "#queries/clients";
@@ -75,4 +76,14 @@ export const getPersonalizedOrganizations = async ({
   }
 
   return { matching: [] };
+};
+
+export const getOrganizationSpecializations = async ({ country }) => {
+  return await getOrganizationSpecializationsQuery({ country })
+    .then((res) => {
+      return res.rows || [];
+    })
+    .catch((err) => {
+      throw err;
+    });
 };

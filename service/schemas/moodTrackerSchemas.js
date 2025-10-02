@@ -25,3 +25,11 @@ export const deleteMoodTrackerHistorySchema = yup.object().shape({
   country: yup.string().required(),
   // language: yup.string().required(),
 });
+
+export const generateReportForPeriodSchema = yup.object().shape({
+  country: yup.string().required(),
+  client_detail_id: yup.string().uuid().required(),
+  startDate: yup.string().required(),
+  endDate: yup.string().required(),
+  language: yup.string().required(),
+});
