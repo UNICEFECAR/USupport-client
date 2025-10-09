@@ -71,7 +71,9 @@ export const generateMoodTrackerCSV = ({
       percentage: ((count / moodTracks.length) * 100).toFixed(1),
     }));
 
-  let csvContent = `"${t("csv_report_title", language)}"\n`;
+  // Add UTF-8 BOM for proper encoding in Excel and other applications
+  let csvContent = "\uFEFF";
+  csvContent += `"${t("csv_report_title", language)}"\n`;
   csvContent += `"${t("csv_date_range", language)}: ${dateRangeHeader}"\n`;
   csvContent += `"${t("csv_total_mood_tracks", language)}: ${
     moodTracks.length
@@ -99,10 +101,7 @@ export const generateMoodTrackerCSV = ({
   csvContent += `"${t("csv_mood", language)}","${t(
     "csv_comment",
     language
-  )}","${t("csv_time", language)}","${t("csv_mood_tracker_id", language)}","${t(
-    "csv_is_critical",
-    language
-  )}"\n`;
+  )}","${t("csv_time", language)}","${t("csv_is_critical", language)}"\n`;
 
   moodTracks.forEach((moodTrack) => {
     const formattedTime = formatDateTimeToReadable(moodTrack.time);
@@ -111,7 +110,7 @@ export const generateMoodTrackerCSV = ({
     const criticalStatus = moodTrack.is_critical
       ? t("csv_yes", language)
       : t("csv_no", language);
-    csvContent += `"${translatedMood}","${moodTrack.comment}","${formattedTime}","${moodTrack.mood_tracker_id}","${criticalStatus}"\n`;
+    csvContent += `"${translatedMood}","${moodTrack.comment}","${formattedTime}","${criticalStatus}"\n`;
   });
 
   return csvContent;
