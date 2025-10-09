@@ -916,7 +916,12 @@ export const getLatestBaselineAssessment = async ({
         },
         country
       );
-      assessment.finalResult = finalResult;
+      assessment.finalResult = {
+        ...finalResult,
+        psychologicalScore: assessment.finalResult.psychological,
+        biologicalScore: assessment.finalResult.biological,
+        socialScore: assessment.finalResult.social,
+      };
     }
 
     return assessment;
