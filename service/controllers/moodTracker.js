@@ -94,14 +94,19 @@ export const generateReportForPeriod = async ({
   endDate,
   language,
 }) => {
+  const normalizedStartDate = new Date(startDate);
+  normalizedStartDate.setHours(0, 0, 0, 0);
+
+  const normalizedEndDate = new Date(endDate);
+  normalizedEndDate.setHours(23, 59, 59, 999);
+
   return await getMoodTrackEntriesForPeriodQuery({
     poolCountry: country,
     client_detail_id,
-    startDate,
-    endDate,
+    startDate: normalizedStartDate,
+    endDate: normalizedEndDate,
   })
     .then((res) => {
-      console.log(res.rows);
       const startDateString = new Date(startDate).toISOString().split("T")[0];
       const endDateString = new Date(endDate).toISOString().split("T")[0];
       const fileName = `mood-tracker-report-${country}-${startDateString}-to-${endDateString}.csv`;
