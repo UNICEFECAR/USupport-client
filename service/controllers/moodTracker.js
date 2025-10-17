@@ -4,6 +4,7 @@ import {
   getMoodTrackEntriesQuery,
   deleteMoodTrackDataQuery,
   getMoodTrackEntriesForPeriodQuery,
+  getHasCompletedMoodTrackerEverQuery,
 } from "#queries/moodTracker";
 
 import { generateMoodTrackerCSV } from "#utils/mood-tracker";
@@ -131,4 +132,18 @@ export const generateReportForPeriod = async ({
     .catch((err) => {
       throw err;
     });
+};
+
+export const getHasCompletedMoodTrackerEver = async ({
+  country,
+  client_detail_id,
+}) => {
+  const res = await getHasCompletedMoodTrackerEverQuery({
+    poolCountry: country,
+    client_detail_id,
+  }).catch((err) => {
+    throw err;
+  });
+
+  return { hasCompleted: res.rowCount > 0 };
 };
