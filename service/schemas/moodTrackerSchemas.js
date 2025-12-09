@@ -33,3 +33,8 @@ export const generateReportForPeriodSchema = yup.object().shape({
   endDate: yup.string().required(),
   language: yup.string().required(),
 });
+
+export const getHasCompletedMoodTrackerEverSchema = yup.object().shape({
+  country: yup.string().required(),
+  client_detail_id: yup.string().uuid().required(),
+});

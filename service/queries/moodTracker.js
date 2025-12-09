@@ -79,3 +79,19 @@ export const getMoodTrackEntriesForPeriodQuery = async ({
     [client_detail_id, startDate, endDate]
   );
 };
+
+export const getHasCompletedMoodTrackerEverQuery = async ({
+  poolCountry,
+  client_detail_id,
+}) => {
+  return await getDBPool("clinicalDb", poolCountry).query(
+    `
+      SELECT 1
+      FROM mood_tracker
+      WHERE client_detail_id = $1
+        AND is_deleted = false
+      LIMIT 1;
+    `,
+    [client_detail_id]
+  );
+};

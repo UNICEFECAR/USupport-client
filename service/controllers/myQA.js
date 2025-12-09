@@ -145,30 +145,47 @@ export const getAllQuestions = async ({
           }
         });
 
-        // For each question find its coresponding tags and provider details
+        // Only keep questions from providers that are not deleted
+        const activeProviderIdsSet = new Set(
+          providersDetails.map((x) => x.provider_detail_id)
+        );
+
+        const filteredQuestions = [];
+
+        // For each question find its corresponding tags and provider details
         for (let i = 0; i < questions.length; i++) {
-          questions[i].tags = questions[i].tags.filter((x) => x);
-          const providerId = questions[i].provider_detail_id;
+          const question = questions[i];
+          question.tags = question.tags.filter((x) => x);
+
+          const providerId = question.provider_detail_id;
+
+          // If the question has a provider, ensure that provider is active (not deleted)
           if (providerId) {
+            if (!activeProviderIdsSet.has(providerId)) {
+              // Provider is deleted, skip this question
+              continue;
+            }
+
             const currentQuestionProviderData = providersDetails.find(
               (x) => x.provider_detail_id === providerId
             );
 
             if (clientDetailId) {
-              questions[i].isLiked =
-                questions[i].likes?.includes(clientDetailId);
-              questions[i].isDisliked =
-                questions[i].dislikes?.includes(clientDetailId);
-              questions[i].isAskedByCurrentClient =
-                questions[i].client_detail_id === clientDetailId;
+              question.isLiked = question.likes?.includes(clientDetailId);
+              question.isDisliked = question.dislikes?.includes(clientDetailId);
+              question.isAskedByCurrentClient =
+                question.client_detail_id === clientDetailId;
             }
 
-            questions[i].providerData = currentQuestionProviderData;
-            questions[i].likes = questions[i].likes?.length || 0;
-            questions[i].dislikes = questions[i].dislikes?.length || 0;
+            question.providerData = currentQuestionProviderData;
+            question.likes = question.likes?.length || 0;
+            question.dislikes = question.dislikes?.length || 0;
           }
+
+          filteredQuestions.push(question);
         }
-        return questions;
+
+        return filteredQuestions;
       }
     })
     .catch((err) => {

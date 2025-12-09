@@ -7,6 +7,7 @@ import {
   getMoodTrackForWeekSchema,
   deleteMoodTrackerHistorySchema,
   generateReportForPeriodSchema,
+  getHasCompletedMoodTrackerEverSchema,
 } from "#schemas/moodTrackerSchemas";
 
 import {
@@ -15,6 +16,7 @@ import {
   getMoodTrackEntries,
   deleteMoodTrackerHistory,
   generateReportForPeriod,
+  getHasCompletedMoodTrackerEver,
 } from "#controllers/moodTracker";
 
 const router = express.Router();
@@ -115,6 +117,23 @@ router.route("/report").get(populateClient, async (req, res, next) => {
       language,
     })
     .then(generateReportForPeriod)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.route("/has-completed").get(populateClient, async (req, res, next) => {
+  /**
+   * #route   GET /client/v1/mood-tracker/has-completed
+   * #desc    Check if client has ever completed mood tracker
+   */
+  const country = req.header("x-country-alpha-2");
+  const client_detail_id = req.client.client_detail_id;
+
+  return await getHasCompletedMoodTrackerEverSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ country, client_detail_id })
+    .then(getHasCompletedMoodTrackerEver)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
