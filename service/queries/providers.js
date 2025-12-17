@@ -19,9 +19,10 @@ export const getMultipleProvidersDataByIDs = async ({
 }) =>
   await getDBPool("piiDb", poolCountry).query(
     `
-        SELECT name, surname, patronym, email, provider_detail_id, image
+        SELECT name, surname, patronym, email, provider_detail.provider_detail_id, image
         FROM provider_detail
-        WHERE provider_detail_id = ANY($1);
+        JOIN "user" ON "user".provider_detail_id = provider_detail.provider_detail_id AND "user".deleted_at IS NULL
+        WHERE provider_detail.provider_detail_id = ANY($1) AND provider_detail.status = 'active';
       `,
     [providerDetailIds]
   );

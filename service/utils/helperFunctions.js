@@ -76,11 +76,22 @@ export const calculateBaselineAssessmentScore = async (scores, country) => {
 
   const getScoreProfile = (score, factor) => {
     const thresholds = baselineAssessmentThresholds[factor];
+    if (
+      !thresholds ||
+      thresholds.below === undefined ||
+      thresholds.above === undefined
+    ) {
+      console.log(
+        `Missing thresholds for factor "${factor}". Thresholds:`,
+        thresholds
+      );
+      return null;
+    }
     if (score < thresholds.below) {
       return "low";
     } else if (score >= thresholds.below && score <= thresholds.above) {
       return "moderate";
-    } else if (score > thresholds.above) {
+    } else {
       return "high";
     }
   };
