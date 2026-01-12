@@ -772,7 +772,12 @@ export const getClientBaselineAssessments = async ({
             },
             country
           );
-          assessments[index].finalResult = finalResult;
+          assessments[index].finalResult = {
+            ...finalResult,
+            psychologicalScore: assessment.finalResult.psychological,
+            biologicalScore: assessment.finalResult.biological,
+            socialScore: assessment.finalResult.social,
+          };
           return finalResult;
         }
       })
