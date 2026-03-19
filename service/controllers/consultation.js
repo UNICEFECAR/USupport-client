@@ -104,6 +104,8 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
       price: consultation.price,
       campaign_id: consultation.campaign_id,
       organization_id: consultation.organization_id,
+      provider_specializations:
+        providersDetails[consultation.provider_detail_id].specializations,
     };
 
     if (consultation.campaign_id) {
