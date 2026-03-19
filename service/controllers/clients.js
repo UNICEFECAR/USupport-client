@@ -14,6 +14,7 @@ import {
   addInformationPortalSuggestionQuery,
   addClientPushNotificationTokenQuery,
   checkIsCouponAvailableQuery,
+  checkActiveCampaignQuery,
   getClientCampaignConsultationsQuery,
   getTotalCampaignConsultationsQuery,
   deleteChatHistoryQuery,
@@ -412,6 +413,18 @@ export const checkIsCouponAvailable = async ({
       success: true,
     };
   }
+};
+
+export const checkActiveCampaign = async ({ country }) => {
+  return await checkActiveCampaignQuery({
+    poolCountry: country,
+  })
+    .then((res) => ({
+      hasActiveCampaign: res.rowCount > 0,
+    }))
+    .catch((err) => {
+      throw err;
+    });
 };
 
 export const deleteChatHistory = async ({
