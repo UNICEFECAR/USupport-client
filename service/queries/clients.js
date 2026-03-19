@@ -256,6 +256,18 @@ export const checkIsCouponAvailableQuery = async ({
   );
 };
 
+export const checkActiveCampaignQuery = async ({ poolCountry }) => {
+  return await getDBPool("piiDb", poolCountry).query(
+    `
+      SELECT campaign_id
+      FROM campaign
+      WHERE active = true
+        AND CURRENT_DATE BETWEEN start_date::date AND end_date::date
+      LIMIT 1;
+    `
+  );
+};
+
 export const getClientCampaignConsultationsQuery = async ({
   poolCountry,
   client_detail_id,
