@@ -17,6 +17,7 @@ import {
   addClientRatingSchema,
   addClientPushNotificationTokenSchema,
   checkIsCouponAvailableSchema,
+  checkActiveCampaignSchema,
   deleteChatHistorySchema,
   addClientCategoryInteractionSchema,
   getCategoryInteractionsSchema,
@@ -42,6 +43,7 @@ import {
   addClientRating,
   addClientPushNotificationToken,
   checkIsCouponAvailable,
+  checkActiveCampaign,
   deleteChatHistory,
   addClientCategoryInteraction,
   getCategoryInteractions,
@@ -460,6 +462,23 @@ router.get("/check-coupon", populateUser, async (req, res, next) => {
     .strict()
     .validate({ country, language, client_detail_id, couponCode })
     .then(checkIsCouponAvailable)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.get("/check-active-campaign", async (req, res, next) => {
+  /**
+   * #route   GET /client/v1/client/check-active-campaign
+   * #desc    Check if there is an active campaign for today
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+
+  return await checkActiveCampaignSchema
+    .noUnknown(true)
+    .strict()
+    .validate({ country, language })
+    .then(checkActiveCampaign)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });

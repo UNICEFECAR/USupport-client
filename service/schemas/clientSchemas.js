@@ -22,7 +22,7 @@ export const updateClientDataSchema = (language) =>
         is: undefined,
         then: yup
           .string()
-          .email({ tlds: { allow: false } })
+          .email(t("email_required_error", language))
           .required(t("email_required_error", language)),
       }),
       currentEmail: yup
@@ -31,7 +31,7 @@ export const updateClientDataSchema = (language) =>
           is: undefined,
           then: yup
             .string()
-            .email({ tlds: { allow: false } })
+            .email(t("email_required_error", language))
             .required(t("email_required_error", language)),
         })
         .nullable(),
@@ -167,6 +167,11 @@ export const checkIsCouponAvailableSchema = yup.object().shape({
   country: yup.string().required(),
   language: yup.string().required(),
   couponCode: yup.string().required(),
+});
+
+export const checkActiveCampaignSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
 });
 
 export const deleteChatHistorySchema = yup.object().shape({
