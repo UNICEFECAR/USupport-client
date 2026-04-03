@@ -23,6 +23,7 @@ app.use("/client/v1/consultation", v1.ConsultationRouter);
 app.use("/client/v1/mood-tracker", v1.MoodTrackerRouter);
 app.use("/client/v1/my-qa", v1.MyQARouter);
 app.use("/client/v1/organization", v1.OrganizationRouter);
+app.use("/client/v1/tts", v1.TtsRouter);
 
 /*------------- Error middleware -------------*/
 

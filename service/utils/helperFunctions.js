@@ -102,3 +102,20 @@ export const calculateBaselineAssessmentScore = async (scores, country) => {
 
   return { psychological, biological, social };
 };
+
+export function escapeXml(text) {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+export function defaultXmlLangFromVoice(voice) {
+  const parts = voice.split("-");
+  if (parts.length >= 2) {
+    return `${parts[0].toLowerCase()}-${parts[1].toUpperCase()}`;
+  }
+  return "en-US";
+}
