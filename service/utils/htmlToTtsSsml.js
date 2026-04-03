@@ -88,5 +88,69 @@ export function plainTextToSegments(plain) {
 export function segmentsToVoiceInnerSsml(segments, escapeXml) {
   if (segments.length === 0) return "";
   const escaped = segments.map(escapeXml);
-  return escaped.join('<break time="600ms"/>');
+  return escaped.join("<break time=\"600ms\"/>");
+}
+
+/**
+ * Full SSML document for Azure (single & chunked requests).
+ * @param {string[]} segments
+ * @param {string} xmlLang
+ * @param {string} voice
+ * @param {(s: string) => string} escapeXml
+ * @returns {string}
+ */
+export function buildSpeakSsml(segments, xmlLang, voice, escapeXml) {
+  const inner = segmentsToVoiceInnerSsml(segments, escapeXml);
+  return `<speak version="1.0" xml:lang="${escapeXml(xmlLang)}">
+                  <voice name="${escapeXml(voice)}">${inner}</voice>
+                </speak>`;
+}
+
+/**
+ * Split paragraph segments so each chunk’s full SSML UTF-8 size is ≤ maxBytes.
+ * @param {string[]} segments
+ * @param {string} xmlLang
+ * @param {string} voice
+ * @param {(s: string) => string} escapeXml
+ * @param {number} maxBytes
+ * @returns {string[][]}
+ */
+export function chunkSegmentsForSsmlLimit(
+  segments,
+  xmlLang,
+  voice,
+  escapeXml,
+  maxBytes
+) {
+  const chunks = [];
+  let current = [];
+
+  for (const seg of segments) {
+    if (
+      Buffer.byteLength(
+        buildSpeakSsml([seg], xmlLang, voice, escapeXml),
+        "utf8"
+      ) > maxBytes
+    ) {
+      const err = new Error(
+        `One paragraph exceeds the ${maxBytes}-byte SSML limit; shorten the paragraph in the CMS.`
+      );
+      err.code = "SSML_SEGMENT_TOO_LARGE";
+      throw err;
+    }
+    const trial = [...current, seg];
+    if (
+      Buffer.byteLength(
+        buildSpeakSsml(trial, xmlLang, voice, escapeXml),
+        "utf8"
+      ) <= maxBytes
+    ) {
+      current = trial;
+    } else {
+      chunks.push(current);
+      current = [seg];
+    }
+  }
+  if (current.length) chunks.push(current);
+  return chunks;
 }
