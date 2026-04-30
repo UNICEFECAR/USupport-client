@@ -6,7 +6,7 @@ import {
   unblockSlotQuery,
 } from "#queries/consultation";
 
-import { getProviderByIdQuery } from "#queries/providers";
+import { getProviderByIdQuery, getLanguageIdByAlpha2Query } from "#queries/providers";
 import { getSponsorNameAndImageByCampaignIdQuery } from "#queries/sponsors";
 
 import { consultationNotFound } from "#utils/errors";
@@ -27,6 +27,12 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
       throw err;
     });
 
+  const languageId = language
+    ? await getLanguageIdByAlpha2Query(language).then(
+        (res) => res.rows[0]?.language_id ?? null
+      )
+    : null;
+
   const providersToFetch = Array.from(
     new Set(
       consultations.map((consultation) => consultation.provider_detail_id)
@@ -41,6 +47,7 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
     providersDetails[providerId] = await getProviderByIdQuery({
       poolCountry: country,
       providerId,
+      languageId,
     })
       .then((res) => {
         if (res.rowCount === 0) {

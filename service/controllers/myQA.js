@@ -6,7 +6,7 @@ import {
   addAnswerVoteQuery,
 } from "#queries/myQA";
 
-import { getMultipleProvidersDataByIDs } from "#queries/providers";
+import { getMultipleProvidersDataByIDs, getLanguageIdByAlpha2Query } from "#queries/providers";
 
 import { getClientDetailIdByUserId } from "#utils/helperFunctions";
 
@@ -51,9 +51,16 @@ export const createQuestion = async ({
 
 export const getClientQuestions = async ({
   country,
+  language,
   client_detail_id,
   languageId,
 }) => {
+  const providerLanguageId = language
+    ? await getLanguageIdByAlpha2Query(language).then(
+        (res) => res.rows[0]?.language_id ?? null
+      )
+    : null;
+
   const questions = await getClientQuestionsQuery({
     poolCountry: country,
     clientDetailId: client_detail_id,
@@ -72,6 +79,7 @@ export const getClientQuestions = async ({
         const providersDetails = await getMultipleProvidersDataByIDs({
           poolCountry: country,
           providerDetailIds: providerIds,
+          languageId: providerLanguageId,
         }).then((res) => {
           if (res.rowCount === 0) {
             return [];
@@ -110,6 +118,12 @@ export const getAllQuestions = async ({
   authHeader,
   languageId,
 }) => {
+  const providerLanguageId = language
+    ? await getLanguageIdByAlpha2Query(language).then(
+        (res) => res.rows[0]?.language_id ?? null
+      )
+    : null;
+
   const questions = await getAllQuestionsQuery({
     poolCountry: country,
     orderBy,
@@ -137,6 +151,7 @@ export const getAllQuestions = async ({
         const providersDetails = await getMultipleProvidersDataByIDs({
           poolCountry: country,
           providerDetailIds: providerIds,
+          languageId: providerLanguageId,
         }).then((res) => {
           if (res.rowCount === 0) {
             return [];
