@@ -63,6 +63,8 @@ jobs:
             echo "  AWS_SECRET_ACCESS_KEY: '${{ secrets.AWS_SECRET_ACCESS_KEY }}'"
             echo "  AWS_REGION: '${{ secrets.AWS_REGION }}'"
             echo "  AWS_BUCKET_NAME: '${{ secrets.AWS_BUCKET_NAME }}'"
+            echo "  AZURE_SPEECH_KEY: '${{ secrets.AZURE_SPEECH_KEY }}'"
+            echo "  AZURE_SPEECH_REGION: '${{ secrets.AZURE_SPEECH_REGION }}'"
           } > kube-config/staging/secrets.yaml
 
       - name: Deploy to Kubernetes
