@@ -38,3 +38,19 @@ export const getPersonalizedOrganizationsSchema = yup.object().shape({
 export const getOrganizationSpecializationsSchema = yup.object().shape({
   country: yup.string().required(),
 });
+
+export const createOrganizationReportSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  organizationId: yup.string().uuid().required(),
+  clientDetailId: yup.string().uuid().required(),
+  reason: yup
+    .string()
+    .nullable()
+    .notRequired()
+    .transform((value) => {
+      if (value == null) return "—";
+      const trimmed = String(value).trim();
+      return trimmed === "" ? "—" : trimmed;
+    }),
+});

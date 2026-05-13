@@ -3,11 +3,18 @@ import {
   getOrganizationByIdQuery,
   getOrganizationSpecializationsQuery,
 } from "#queries/organizations";
+import {
+  hasRecentOrganizationReportForClientQuery,
+  insertOrganizationReportQuery,
+} from "#queries/organizationReports";
 
 import { getLatestBaselineAssessmentQuery } from "#queries/clients";
 import { getBaselineAssessmentMatchingQuery } from "#queries/baselineAssessment";
 import { calculateBaselineAssessmentScore } from "#utils/helperFunctions";
-import { organizationNotFound } from "#utils/errors";
+import {
+  organizationNotFound,
+  organizationReportTooSoon,
+} from "#utils/errors";
 
 export const getOrganizations = async (data) => {
   return await getOrganizationsQuery(data)
@@ -86,4 +93,33 @@ export const getOrganizationSpecializations = async ({ country }) => {
     .catch((err) => {
       throw err;
     });
+};
+
+export const createOrganizationReport = async (data) => {
+  const org = await getOrganizationByIdQuery({
+    country: data.country,
+    organizationId: data.organizationId,
+    language: data.language,
+  });
+
+  if (org.rows.length === 0) {
+    throw organizationNotFound(data.language);
+  }
+
+  const recent = await hasRecentOrganizationReportForClientQuery({
+    poolCountry: data.country,
+    organizationId: data.organizationId,
+    clientDetailId: data.clientDetailId,
+  });
+
+  if (recent.rowCount > 0) {
+    throw organizationReportTooSoon(data.language);
+  }
+
+  return await insertOrganizationReportQuery({
+    poolCountry: data.country,
+    organizationId: data.organizationId,
+    clientDetailId: data.clientDetailId,
+    reason: data.reason ?? "—",
+  }).then((res) => res.rows[0]);
 };
