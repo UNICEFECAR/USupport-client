@@ -12,6 +12,7 @@
   "consultation_not_found_error": "Консультация табылмады",
   "error_occured": "Қателік пайда болды",
   "organization_not_found_error": "Организация табылмады",
+  "organization_report_rate_limit_error": "Хабарлау лимиті шегіне жетті. Кейінірек қайталап көріңіз.",
   "country_not_supported_error": "Бұл елде қызмет ету қолжетерлік емес",
   "csv_report_title": "Көңіл-күй трекерінің есебі",
   "csv_date_range": "Күндер аралығы",

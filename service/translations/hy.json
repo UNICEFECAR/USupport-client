@@ -12,6 +12,7 @@
   "consultation_not_found_error": "Խորհրդատվությունը չի գտնվել",
   "error_occured": "Տեղի է ունեցել սխալ",
   "organization_not_found_error": "Organization not found",
+  "organization_report_rate_limit_error": "Բողոքի սահմանը ներկայումս լրացված է: Խնդրում ենք վերադառնալ և փորձել ավելի ուշ:",
   "csv_report_title": "Տրամադրության հետևման հաշվետվություն",
   "csv_date_range": "Ամսաթվերի միջակայք",
   "csv_total_mood_tracks": "Տրամադրության գրառումների ընդհանուր քանակը",

@@ -12,6 +12,7 @@
   "consultation_not_found_error": "Консультация не найдена",
   "error_occured": "Произошла ошибка",
   "organization_not_found_error": "Организация не найдена",
+  "organization_report_rate_limit_error": "Сейчас достигнут лимит обращений. Попробуйте позже.",
   "country_not_supported_error": "Функциональность не поддерживается в этой стране",
   "csv_report_title": "Отчет трекера настроения",
   "csv_date_range": "Диапазон дат",

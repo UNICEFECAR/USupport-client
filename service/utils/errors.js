@@ -80,6 +80,14 @@ export const organizationNotFound = (language) => {
   return error;
 };
 
+export const organizationReportTooSoon = (language) => {
+  const error = new Error();
+  error.message = t("organization_report_rate_limit_error", language);
+  error.name = "ORGANIZATION REPORT RATE LIMITED";
+  error.status = 429;
+  return error;
+};
+
 export const countryNotSupported = (language) => {
   const error = new Error();
   error.message = t("country_not_supported_error", language);

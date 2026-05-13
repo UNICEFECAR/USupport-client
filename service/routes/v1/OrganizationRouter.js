@@ -5,12 +5,14 @@ import {
   organizationIdSchema,
   getPersonalizedOrganizationsSchema,
   getOrganizationSpecializationsSchema,
+  createOrganizationReportSchema,
 } from "#schemas/organizationSchemas";
 import {
   getOrganizations,
   getOrganizationById,
   getPersonalizedOrganizations,
   getOrganizationSpecializations,
+  createOrganizationReport,
 } from "#controllers/organizations";
 import { populateClient } from "#middlewares/populateMiddleware";
 
@@ -83,6 +85,32 @@ router.get("/specializations", async (req, res, next) => {
     .strict()
     .validate({ country })
     .then(getOrganizationSpecializations)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.post("/:organizationId/report", populateClient, async (req, res, next) => {
+  /**
+   * #route   POST /client/v1/organization/:organizationId/report
+   * #desc    Create organization report (max once per organization per hour per client)
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+  const { organizationId } = req.params;
+  const clientDetailId = req.client.client_detail_id;
+  const payload = req.body;
+
+  return await createOrganizationReportSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({
+      ...payload,
+      country,
+      language,
+      organizationId,
+      clientDetailId,
+    })
+    .then(createOrganizationReport)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });

@@ -12,6 +12,7 @@
   "consultation_not_found_error": "Δεν βρέθηκε συνεδρία",
   "error_occured": "Παρουσιάστηκε σφάλμα",
   "organization_not_found_error": "Δεν βρέθηκε οργανισμός",
+  "organization_report_rate_limit_error": "Έχετε φτάσει προσωρινά το όριο αναφορών. Δοκιμάστε ξανά αργότερα.",
   "en_error_occured": "",
   "country_not_supported_error": "",
   "csv_report_title": "Αναφορά καταγραφής διάθεσης",
