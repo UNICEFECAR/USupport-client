@@ -13,6 +13,7 @@
   "error_occured": "Wystąpił błąd",
   "organization_not_found_error": "Nie znaleziono organizacji",
   "organization_report_rate_limit_error": "Osiągnięto limit zgłoszeń. Spróbuj ponownie później.",
+  "organization_report_reason_required": "Podaj szczegóły zgłoszenia.",
   "country_not_supported_error": "Funkcja nie jest obsługiwana w tym kraju",
   "csv_report_title": "Raport śledzenia nastroju",
   "csv_date_range": "Zakres dat",

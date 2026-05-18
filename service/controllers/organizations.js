@@ -120,6 +120,6 @@ export const createOrganizationReport = async (data) => {
     poolCountry: data.country,
     organizationId: data.organizationId,
     clientDetailId: data.clientDetailId,
-    reason: data.reason ?? "—",
+    reason: data.reason,
   }).then((res) => res.rows[0]);
 };

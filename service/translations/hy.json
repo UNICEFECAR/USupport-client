@@ -13,6 +13,7 @@
   "error_occured": "Տեղի է ունեցել սխալ",
   "organization_not_found_error": "Organization not found",
   "organization_report_rate_limit_error": "Բողոքի սահմանը ներկայումս լրացված է: Խնդրում ենք վերադառնալ և փորձել ավելի ուշ:",
+  "organization_report_reason_required": "Խնդրում ենք մուտքագրել ձեր բողոքի մանրամասները:",
   "csv_report_title": "Տրամադրության հետևման հաշվետվություն",
   "csv_date_range": "Ամսաթվերի միջակայք",
   "csv_total_mood_tracks": "Տրամադրության գրառումների ընդհանուր քանակը",
