@@ -13,6 +13,7 @@
   "error_occured": "An error occurred",
   "organization_not_found_error": "Organization not found",
   "organization_report_rate_limit_error": "You've hit the reporting limit for now. Please come back and try again later.",
+  "organization_report_reason_required": "Please enter details about your report.",
   "csv_report_title": "Mood Tracker Report",
   "csv_date_range": "Date Range",
   "csv_total_mood_tracks": "Total Mood Tracks",

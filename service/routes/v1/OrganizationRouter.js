@@ -100,7 +100,7 @@ router.post("/:organizationId/report", populateClient, async (req, res, next) =>
   const clientDetailId = req.client.client_detail_id;
   const payload = req.body;
 
-  return await createOrganizationReportSchema
+  return await createOrganizationReportSchema(language)
     .noUnknown(true)
     .strict(true)
     .validate({
