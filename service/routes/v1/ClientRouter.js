@@ -79,7 +79,7 @@ router.post(
       .then(addPlatformSuggestion)
       .then((result) => res.status(200).send(result))
       .catch(next);
-  }
+  },
 );
 
 router.post(
@@ -102,7 +102,7 @@ router.post(
       .then(addBaselineAssessmentAnswer)
       .then((result) => res.status(200).send(result))
       .catch(next);
-  }
+  },
 );
 
 router.get("/baseline-assessment/questions", async (req, res, next) => {
@@ -141,7 +141,7 @@ router.get(
       .then(getClientBaselineAssessments)
       .then((result) => res.status(200).send(result))
       .catch(next);
-  }
+  },
 );
 
 router.get(
@@ -169,7 +169,7 @@ router.get(
       .then(getClientAnswersForBaselineAssessmentById)
       .then((result) => res.status(200).send(result))
       .catch(next);
-  }
+  },
 );
 
 router.post(
@@ -191,7 +191,7 @@ router.post(
       .then(createBaselineAssessment)
       .then((result) => res.status(200).send(result))
       .catch(next);
-  }
+  },
 );
 
 router.get(
@@ -213,7 +213,7 @@ router.get(
       .then(getLatestBaselineAssessment)
       .then((result) => res.status(200).send(result))
       .catch(next);
-  }
+  },
 );
 
 router.get("/", populateClient, async (req, res) => {
@@ -377,7 +377,7 @@ router.put(
       .then(updateClientDataProcessing)
       .then((result) => res.status(200).send(result))
       .catch(next);
-  }
+  },
 );
 
 router
@@ -442,7 +442,7 @@ router.put(
       .then(addClientPushNotificationToken)
       .then((result) => res.status(200).send(result))
       .catch(next);
-  }
+  },
 );
 
 router.get("/check-coupon", populateUser, async (req, res, next) => {
@@ -525,7 +525,7 @@ router.post(
       .then(addClientCategoryInteraction)
       .then((result) => res.status(200).send(result))
       .catch(next);
-  }
+  },
 );
 
 router.get("/category-interactions", populateUser, async (req, res, next) => {
@@ -566,14 +566,13 @@ router.patch(
       .then(updateClientHasCheckedBaselineAssessment)
       .then((result) => res.status(200).send(result))
       .catch(next);
-  }
+  },
 );
 
 router.post(
   "/sos-center-click",
   populateExistingUser,
   async (req, res, next) => {
-    console.log("here");
     /**
      * #route   POST /client/v1/client/sos-center-click
      * #desc    Track SOS center click interaction
@@ -590,7 +589,7 @@ router.post(
       .then(addSOSCenterClick)
       .then((result) => res.status(200).send(result))
       .catch(next);
-  }
+  },
 );
 
 export { router };

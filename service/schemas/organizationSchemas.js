@@ -1,5 +1,7 @@
 import * as yup from "yup";
 
+import { t } from "#translations/index";
+
 export const getOrganizationSchema = yup.object().shape({
   country: yup.string().required(),
   language: yup.string().required(),
@@ -38,3 +40,19 @@ export const getPersonalizedOrganizationsSchema = yup.object().shape({
 export const getOrganizationSpecializationsSchema = yup.object().shape({
   country: yup.string().required(),
 });
+
+export const createOrganizationReportSchema = (language) =>
+  yup.object().shape({
+    country: yup.string().required(),
+    language: yup.string().required(),
+    organizationId: yup.string().uuid().required(),
+    clientDetailId: yup.string().uuid().required(),
+    reason: yup
+      .string()
+      .required(t("organization_report_reason_required", language))
+      .trim()
+      .min(
+        1,
+        t("organization_report_reason_required", language),
+      ),
+  });

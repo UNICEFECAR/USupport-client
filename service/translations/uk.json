@@ -12,6 +12,8 @@
   "consultation_not_found_error": "Консультації не знайдено",
   "error_occured": "Виникла помилка",
   "organization_not_found_error": "Організацію не знайдено",
+  "organization_report_rate_limit_error": "Ліміт скарг наразі вичерпано. Спробуйте пізніше.",
+  "organization_report_reason_required": "Вкажіть деталі скарги.",
   "country_not_supported_error": "Функціональність не підтримується в цій країні",
   "csv_report_title": "Звіт трекера настрою",
   "csv_date_range": "Проміжок дат",
