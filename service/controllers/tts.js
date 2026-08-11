@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import crypto from "crypto";
-import AWS from "aws-sdk";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { mkdtemp, writeFile, readFile, rm } from "fs/promises";
@@ -42,6 +42,7 @@ const SPEECH_KEY = process.env.AZURE_SPEECH_KEY || "";
 const SPEECH_REGION = process.env.AZURE_SPEECH_REGION || "eastus";
 const AWS_REGION = process.env.AWS_REGION || "eu-central-1";
 const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME || "";
+const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID || "";
 
 const DEFAULT_OUTPUT_FORMAT = "audio-16khz-32kbitrate-mono-mp3";
 const WAV_OUTPUT_FORMAT = "riff-16khz-16bit-mono-pcm";
@@ -50,7 +51,7 @@ const WAV_OUTPUT_FORMAT = "riff-16khz-16bit-mono-pcm";
 const MAX_SSML_BYTES = 60 * 1024;
 
 const DEFAULT_S3_PREFIX = "tts";
-const s3 = new AWS.S3({ region: AWS_REGION });
+const s3 = new S3Client({ region: AWS_REGION });
 
 const AZURE_TTS_TIMEOUT_MS = 90_000;
 
@@ -116,7 +117,7 @@ async function synthesizeWithAzure(ssml, outputFormat) {
       const audioBuf = await requestAzureTtsAudioOnce(ssml, outputFormat);
       console.log(
         { audioBytes: audioBuf.length, outputFormat, attempt },
-        "azureTts response"
+        "azureTts response",
       );
       return audioBuf;
     } catch (e) {
@@ -183,7 +184,7 @@ async function mergeWavBuffersToMp3(wavBuffers) {
         "1",
         outPath,
       ],
-      { maxBuffer: 10 * 1024 * 1024 }
+      { maxBuffer: 10 * 1024 * 1024 },
     );
 
     return await readFile(outPath);
@@ -227,7 +228,7 @@ export const synthesizeSpeech = async (payload) => {
   const segments = sanitizeSegmentsForTts(
     contentFormat === "html"
       ? htmlToPlainSegments(text)
-      : plainTextToSegments(text)
+      : plainTextToSegments(text),
   );
 
   if (segments.length === 0) {
@@ -236,7 +237,7 @@ export const synthesizeSpeech = async (payload) => {
 
   const plainCharCount = segments.reduce(
     (sum, segment) => sum + segment.length,
-    0
+    0,
   );
   if (plainCharCount > MAX_PLAIN_TEXT_LENGTH) {
     throw ttsPlainTextTooLongError(MAX_PLAIN_TEXT_LENGTH);
@@ -259,7 +260,7 @@ export const synthesizeSpeech = async (payload) => {
         xmlLang,
         voice,
         escapeXml,
-        MAX_SSML_BYTES
+        MAX_SSML_BYTES,
       );
     } catch (e) {
       throw ttsValidationError(e.message);
@@ -269,9 +270,9 @@ export const synthesizeSpeech = async (payload) => {
       segmentChunks.map((chunk) =>
         synthesizeWithAzure(
           buildSpeakSsml(chunk, xmlLang, voice, escapeXml),
-          WAV_OUTPUT_FORMAT
-        )
-      )
+          WAV_OUTPUT_FORMAT,
+        ),
+      ),
     );
 
     buffer = await mergeWavBuffersToMp3(wavBuffers);
@@ -300,15 +301,20 @@ export const synthesizeSpeech = async (payload) => {
       throw ttsS3BucketNotConfiguredError();
     }
 
-    await s3
-      .putObject({
-        Bucket: AWS_BUCKET_NAME,
-        Key: ttsKey,
-        Body: buffer,
-        ContentType: "audio/mpeg",
-        CacheControl: "public, max-age=31536000",
-      })
-      .promise();
+    try {
+      await s3.send(
+        new PutObjectCommand({
+          Bucket: AWS_BUCKET_NAME,
+          Key: ttsKey,
+          Body: buffer,
+          ContentType: "audio/mpeg",
+          CacheControl: "public, max-age=31536000",
+        })
+      );
+    } catch (e) {
+      console.log("AWS_ACCESS_KEY_ID:", AWS_ACCESS_KEY_ID);
+      throw e;
+    }
 
     s3Key = ttsKey;
     s3Url = `https://${AWS_BUCKET_NAME}.s3.${AWS_REGION}.amazonaws.com/${ttsKey}`;
