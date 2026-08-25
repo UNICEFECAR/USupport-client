@@ -40,7 +40,7 @@ export const getMoodTrackEntriesQuery = async ({
       FROM mood_tracker
       WHERE client_detail_id = $1
         AND is_deleted = false
-      ORDER BY id DESC
+      ORDER BY time DESC
       OFFSET $2 LIMIT $3;
     `,
     [client_id, offset, limit]
