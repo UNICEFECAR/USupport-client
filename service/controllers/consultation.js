@@ -6,7 +6,10 @@ import {
   unblockSlotQuery,
 } from "#queries/consultation";
 
-import { getProviderByIdQuery, getLanguageIdByAlpha2Query } from "#queries/providers";
+import {
+  getProviderByIdQuery,
+  getLanguageIdByAlpha2Query,
+} from "#queries/providers";
 import { getSponsorNameAndImageByCampaignIdQuery } from "#queries/sponsors";
 
 import { consultationNotFound } from "#utils/errors";
@@ -97,6 +100,14 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
     const providerSurname =
       providersDetails[consultation.provider_detail_id].surname;
 
+    const providerJoined =
+      consultation.provider_join_time || consultation.provider_leave_time;
+    const clientJoined =
+      consultation.client_join_time || consultation.client_leave_time;
+
+    const status =
+      clientJoined && providerJoined ? "finished" : consultation.status;
+
     const res = {
       consultation_id: consultation.consultation_id,
       chat_id: consultation.chat_id,
@@ -107,7 +118,7 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
       client_detail_id: consultation.client_detail_id,
       provider_image: providersDetails[consultation.provider_detail_id].image,
       time: consultation.time,
-      status: consultation.status,
+      status,
       price: consultation.price,
       campaign_id: consultation.campaign_id,
       organization_id: consultation.organization_id,
