@@ -33,6 +33,7 @@ export const getMultipleProvidersDataByIDs = async ({
   poolCountry,
   providerDetailIds,
   languageId,
+  includeInactive = false,
 }) =>
   await getDBPool("piiDb", poolCountry).query(
     `
@@ -48,9 +49,10 @@ export const getMultipleProvidersDataByIDs = async ({
         LEFT JOIN provider_detail_translations pdt
           ON pdt.provider_detail_id = provider_detail.provider_detail_id
           AND pdt.language_id = $2::UUID
-        WHERE provider_detail.provider_detail_id = ANY($1) AND provider_detail.status = 'active';
+        WHERE provider_detail.provider_detail_id = ANY($1)
+          AND ($3::BOOLEAN IS TRUE OR provider_detail.status = 'active');
       `,
-    [providerDetailIds, languageId]
+    [providerDetailIds, languageId, includeInactive]
   );
 
 export const getLanguageIdByAlpha2Query = async (alpha2) =>
