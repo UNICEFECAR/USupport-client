@@ -80,6 +80,8 @@ export const getClientQuestions = async ({
           poolCountry: country,
           providerDetailIds: providerIds,
           languageId: providerLanguageId,
+          // Deactivated providers' answers stay visible; only deleted ones are hidden
+          includeInactive: true,
         }).then((res) => {
           if (res.rowCount === 0) {
             return [];
