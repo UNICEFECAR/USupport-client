@@ -43,7 +43,8 @@ export const getMultipleProvidersDataByIDs = async ({
           COALESCE(pdt.surname, provider_detail.surname) AS surname,
           COALESCE(pdt.patronym, provider_detail.patronym) AS patronym,
           provider_detail.email,
-          provider_detail.image
+          provider_detail.image,
+          provider_detail.status
         FROM provider_detail
         JOIN "user" ON "user".provider_detail_id = provider_detail.provider_detail_id AND "user".deleted_at IS NULL
         LEFT JOIN provider_detail_translations pdt
