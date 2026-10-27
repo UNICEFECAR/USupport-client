@@ -118,6 +118,7 @@ export const getAllConsultations = async ({ country, language, client_id }) => {
       client_detail_id: consultation.client_detail_id,
       provider_image: providersDetails[consultation.provider_detail_id].image,
       time: consultation.time,
+      duration_minutes: consultation.duration_minutes,
       status,
       price: consultation.price,
       campaign_id: consultation.campaign_id,
