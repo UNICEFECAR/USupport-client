@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 
 import {
   getClientByIdQuery,
+  updateClientHasSeenInitialGuideQuery,
   updateClientDataQuery,
   checkIfEmailIsUsedQuery,
   deleteClientDataQuery,
@@ -60,6 +61,25 @@ const AWS_REGION = process.env.AWS_REGION;
 const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 
 const QUESTIONS_COUNT = 27;
+
+export const updateClientHasSeenInitialGuide = async ({
+  country,
+  language,
+  userId,
+}) => {
+  if (country !== "AM") {
+    throw countryNotSupported(language);
+  }
+
+  const { rowCount } = await updateClientHasSeenInitialGuideQuery({
+    poolCountry: country,
+    userId,
+  });
+  if (rowCount === 1) {
+    await deleteCacheItem(`client_${country}_${userId}`).catch(console.error);
+  }
+  return { claimed: rowCount === 1 };
+};
 
 export const getClientById = async ({ country, language, clientId }) => {
   return await getClientByIdQuery({

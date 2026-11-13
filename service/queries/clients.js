@@ -18,7 +18,7 @@ export const getClientByUserID = async (poolCountry, user_id) =>
     `
     WITH userData AS (
 
-      SELECT client_detail_id 
+      SELECT client_detail_id, has_seen_initial_guide
       FROM "user"
       WHERE user_id = $1
       ORDER BY created_at DESC
@@ -26,7 +26,7 @@ export const getClientByUserID = async (poolCountry, user_id) =>
 
     ), clientData AS (
 
-        SELECT client_detail."client_detail_id", "name", surname, nickname, email, image, sex, year_of_birth, urban_rural, data_processing, access_token, push_notification_tokens, has_checked_baseline_assessment
+        SELECT client_detail."client_detail_id", "name", surname, nickname, email, image, sex, year_of_birth, urban_rural, data_processing, access_token, push_notification_tokens, has_checked_baseline_assessment, userData.has_seen_initial_guide
         FROM client_detail
           JOIN userData ON userData.client_detail_id = client_detail.client_detail_id
         ORDER BY client_detail.created_at DESC
@@ -37,6 +37,23 @@ export const getClientByUserID = async (poolCountry, user_id) =>
     SELECT * FROM clientData;
     `,
     [user_id]
+  );
+
+export const updateClientHasSeenInitialGuideQuery = async ({
+  poolCountry,
+  userId,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+      UPDATE "user"
+      SET has_seen_initial_guide = TRUE
+      WHERE user_id = $1
+        AND type = 'client'
+        AND client_detail_id IS NOT NULL
+        AND deleted_at IS NULL
+        AND has_seen_initial_guide = FALSE;
+    `,
+    [userId]
   );
 
 export const getCliendDetailByUserIdQuery = async ({
