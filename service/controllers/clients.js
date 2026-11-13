@@ -6,6 +6,8 @@ import {
 } from "@aws-sdk/client-s3";
 import bcrypt from "bcryptjs";
 
+import { getCountryUserGuidesActiveQuery } from "#queries/countries";
+
 import {
   getClientByIdQuery,
   updateClientHasSeenInitialGuideQuery,
@@ -67,7 +69,8 @@ export const updateClientHasSeenInitialGuide = async ({
   language,
   userId,
 }) => {
-  if (country !== "AM") {
+  const { rows } = await getCountryUserGuidesActiveQuery({ country });
+  if (rows[0]?.user_guides_active !== true) {
     throw countryNotSupported(language);
   }
 
