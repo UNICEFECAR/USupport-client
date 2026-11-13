@@ -8,6 +8,7 @@ import {
 
 import {
   getClientByIdSchema,
+  updateClientHasSeenInitialGuideSchema,
   updateClientDataSchema,
   deleteClientDataSchema,
   updateClientImageSchema,
@@ -34,6 +35,7 @@ import {
 
 import {
   getClientById,
+  updateClientHasSeenInitialGuide,
   updateClientData,
   deleteClientData,
   updateClientImage,
@@ -224,6 +226,24 @@ router.get("/", populateClient, async (req, res) => {
   const clientData = req.client;
 
   res.status(200).send(clientData);
+});
+
+router.patch("/initial-guide-seen", async (req, res, next) => {
+  /**
+   * #route   PATCH /client/v1/client/initial-guide-seen
+   * #desc    Record the first presentation of the initial guide
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+  const userId = req.header("x-user-id");
+
+  return await updateClientHasSeenInitialGuideSchema
+    .noUnknown(true)
+    .strict()
+    .validate({ country, language, userId })
+    .then(updateClientHasSeenInitialGuide)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
 });
 
 router.get("/by-id", async (req, res, next) => {
