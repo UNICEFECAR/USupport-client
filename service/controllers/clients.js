@@ -6,8 +6,11 @@ import {
 } from "@aws-sdk/client-s3";
 import bcrypt from "bcryptjs";
 
+import { getCountryUserGuidesActiveQuery } from "#queries/countries";
+
 import {
   getClientByIdQuery,
+  updateClientHasSeenInitialGuideQuery,
   updateClientDataQuery,
   checkIfEmailIsUsedQuery,
   deleteClientDataQuery,
@@ -60,6 +63,26 @@ const AWS_REGION = process.env.AWS_REGION;
 const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 
 const QUESTIONS_COUNT = 27;
+
+export const updateClientHasSeenInitialGuide = async ({
+  country,
+  language,
+  userId,
+}) => {
+  const { rows } = await getCountryUserGuidesActiveQuery({ country });
+  if (rows[0]?.user_guides_active !== true) {
+    throw countryNotSupported(language);
+  }
+
+  const { rowCount } = await updateClientHasSeenInitialGuideQuery({
+    poolCountry: country,
+    userId,
+  });
+  if (rowCount === 1) {
+    await deleteCacheItem(`client_${country}_${userId}`).catch(console.error);
+  }
+  return { claimed: rowCount === 1 };
+};
 
 export const getClientById = async ({ country, language, clientId }) => {
   return await getClientByIdQuery({

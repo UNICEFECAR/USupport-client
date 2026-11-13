@@ -8,6 +8,12 @@ const sexTypeSchema = yup
 
 const urbanRuralTypeSchema = yup.string().oneOf(["urban", "rural"]);
 
+export const updateClientHasSeenInitialGuideSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  userId: yup.string().uuid().required(),
+});
+
 export const updateClientDataSchema = (language) =>
   yup.object().shape(
     {
